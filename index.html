@@ -611,7 +611,13 @@
       name = product.name;
       unit = product.unit;
     }
-    items.push({ name, unit, qty, price });
+    // Merge with existing row if same item+price exists
+    const existing = items.find(it => it.name === name && it.price === price);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      items.push({ name, unit, qty, price });
+    }
     renderItems();
     clearPanel();
 
