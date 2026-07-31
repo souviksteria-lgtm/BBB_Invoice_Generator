@@ -59,7 +59,7 @@
       border-radius: 6px;
       padding: 5px 14px;
       font-size: 0.82rem;
-      color: #4a3000;
+      color: #000;
       font-weight: 600;
       letter-spacing: 0.3px;
     }
@@ -272,9 +272,10 @@
       .no-print { display: none !important; }
       .add-item-panel { display: none !important; }
       .brand-header { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .brand-name { color: #7b1a1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .brand-tagline { color: #b03030 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .fssai-badge { color: #000 !important; border: 1px solid #999 !important; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .brand-header * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .brand-name { color: #7b1a1a !important; }
+      .brand-tagline { color: #b03030 !important; }
+      .fssai-badge { color: #000 !important; border: 1px solid #999 !important; background: #fff !important; }
       .fssai-badge strong { color: #000 !important; }
       input[type="text"], textarea {
         border: none;
