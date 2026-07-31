@@ -59,9 +59,11 @@
       border-radius: 6px;
       padding: 5px 14px;
       font-size: 0.82rem;
-      color: #000;
+      color: #000 !important;
       font-weight: 600;
       letter-spacing: 0.3px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .app-title {
@@ -301,9 +303,9 @@
       .add-item-panel { display: none !important; }
       .brand-header { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .brand-header * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-      .brand-name { color: #7b1a1a !important; }
-      .brand-tagline { color: #b03030 !important; }
-      .fssai-badge { color: #000 !important; border: 1px solid #999 !important; background: #fff !important; }
+      .brand-name { color: #7b1a1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .brand-tagline { color: #b03030 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .fssai-badge { color: #000 !important; border: 1px solid #999 !important; background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       .fssai-badge strong { color: #000 !important; }
       input[type="text"], textarea {
         border: none;
@@ -324,7 +326,7 @@
     <div class="brand-name">Beyond Blissful Bakes</div>
     <div class="brand-tagline">your happiness our priority</div>
     <div class="fssai-badge">
-      FSSAI &nbsp;|&nbsp; Lic. No.&nbsp;<strong>22726694000028</strong>
+      FSSAI &nbsp;|&nbsp; Lic. No.&nbsp;22726694000028
     </div>
   </div>
 
