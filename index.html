@@ -12,7 +12,7 @@
       background: #f0f4f8;
       color: #2d3748;
       min-height: 100vh;
-      padding: 16px;
+      padding: 8px 16px 16px;
       font-size: 14px;
     }
 
@@ -22,16 +22,16 @@
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-      padding: 28px 24px 32px;
+      padding: 16px 24px 32px;
     }
 
     /* ── Header ── */
     /* ── Brand header ── */
     .brand-header {
       text-align: center;
-      padding: 18px 12px 14px;
+      padding: 12px 12px 10px;
       border-bottom: 3px solid #7b1a1a;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       background: linear-gradient(135deg, #fff 60%, #fdf5f5 100%);
       border-radius: 8px 8px 0 0;
     }
@@ -110,8 +110,8 @@
     }
 
     .field-group {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
       margin-bottom: 24px;
     }
