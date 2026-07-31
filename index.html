@@ -274,13 +274,16 @@
 
     /* ── Payment QR Section ── */
     .payment-qr-section {
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 16px;
       margin-top: 28px;
       padding: 20px;
       border-top: 2px solid #1a365d;
+    }
+    .payment-qr-section.visible {
+      display: flex;
     }
     .payment-qr-label {
       font-size: 1rem;
@@ -577,6 +580,7 @@
       tbody.innerHTML = '<tr id="emptyRow"><td colspan="7" class="empty-state">No items added yet.</td></tr>';
       document.getElementById('grandTotal').textContent = '₹0.00';
       document.getElementById('itemCountNote').textContent = '0 / 20 items';
+      document.querySelector('.payment-qr-section').classList.remove('visible');
       return;
     }
 
@@ -600,7 +604,15 @@
 
     document.getElementById('grandTotal').textContent = `₹${grand.toFixed(2)}`;
     document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
-    generatePaymentQR();
+    
+    // Show QR section only if grand total > 0
+    const qrSection = document.querySelector('.payment-qr-section');
+    if (grand > 0) {
+      qrSection.classList.add('visible');
+      generatePaymentQR();
+    } else {
+      qrSection.classList.remove('visible');
+    }
   }
 
   function escapeHtml(str) {
@@ -665,8 +677,8 @@
     });
   }
 
-  // Initialize QR code on page load
-  generatePaymentQR();
+  // Initialize - QR code will show only when total > 0
+  // generatePaymentQR() is called from renderItems() when needed
 
 </script>
 </body>
