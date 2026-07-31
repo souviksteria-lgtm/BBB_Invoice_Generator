@@ -265,6 +265,33 @@
       margin: 20px 0;
     }
 
+    /* ── Payment QR Section ── */
+    .payment-qr-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-top: 28px;
+      padding: 20px;
+      border-top: 2px solid #1a365d;
+    }
+    .payment-qr-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    #qrcodeContainer {
+      border: 2px solid #3182ce;
+      border-radius: 8px;
+      padding: 8px;
+      background: #fff;
+    }
+    #qrcodeContainer img, #qrcodeContainer canvas {
+      display: block;
+    }
+
     /* ── Print styles ── */
     @media print {
       body { background: #fff; padding: 0; }
@@ -286,6 +313,7 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -370,6 +398,12 @@
   <div class="grand-total-row">
     <span class="grand-total-label">Grand Total</span>
     <span class="grand-total-value" id="grandTotal">₹0.00</span>
+  </div>
+
+  <!-- Payment QR Section -->
+  <div class="payment-qr-section no-print">
+    <div class="payment-qr-label">💳 Pay Here</div>
+    <div id="qrcodeContainer"></div>
   </div>
 
   <hr class="divider" />
@@ -558,6 +592,7 @@
 
     document.getElementById('grandTotal').textContent = `₹${grand.toFixed(2)}`;
     document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
+    generatePaymentQR();
   }
 
   function escapeHtml(str) {
@@ -598,6 +633,32 @@
       alert('Snapshot failed. Please try again.');
     });
   }
+
+  const UPI_ID = 'your-upi-id@bank'; // ⚠️ Replace with your actual UPI ID
+  const BUSINESS_NAME = 'Beyond Blissful Bakes';
+
+  function generatePaymentQR() {
+    const grandTotalText = document.getElementById('grandTotal').textContent;
+    const amount = parseFloat(grandTotalText.replace('₹', '').trim());
+    
+    if (amount <= 0) return;
+    
+    const upiString = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(BUSINESS_NAME)}&am=${amount.toFixed(2)}&tn=BBB%20Invoice`;
+    
+    const container = document.getElementById('qrcodeContainer');
+    container.innerHTML = '';
+    new QRCode(container, {
+      text: upiString,
+      width: 200,
+      height: 200,
+      colorDark: '#000',
+      colorLight: '#fff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  // Initialize QR code on page load
+  generatePaymentQR();
 
 </script>
 </body>
