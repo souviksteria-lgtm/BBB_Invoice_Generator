@@ -365,7 +365,7 @@
         <select id="itemName" onchange="onItemSelect()">
           <option value="">— Select item —</option>
         </select>
-        <input type="number" id="itemQty" placeholder="Qty" min="1" step="1" />
+        <input type="number" id="itemQty" placeholder="Qty" min="1" step="1" value="1" />
         <input type="number" id="itemPrice" placeholder="Price (₹)" min="0" step="0.01" />
       </div>
       <!-- shown only when Other is selected -->
@@ -669,8 +669,8 @@
     container.innerHTML = '';
     new QRCode(container, {
       text: upiString,
-      width: 200,
-      height: 200,
+      width: 150,
+      height: 150,
       colorDark: '#000',
       colorLight: '#fff',
       correctLevel: QRCode.CorrectLevel.H
