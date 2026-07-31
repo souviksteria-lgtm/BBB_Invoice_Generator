@@ -396,6 +396,12 @@
 
   <!-- Items Section -->
   <div class="items-section">
+    <!-- Add Item Button -->
+    <div class="action-row no-print" id="addItemBtnRow" style="margin-bottom:8px;">
+      <button class="btn btn-primary" id="addItemBtn" onclick="showAddPanel()">+ Add Item</button>
+      <span class="item-count-note" id="itemCountNote">0 / 20 items</span>
+    </div>
+
     <p class="section-title">Items</p>
 
     <!-- Add Item Panel -->
@@ -415,12 +421,6 @@
         <button class="btn btn-success" onclick="addItem()">+ Add</button>
         <button class="btn btn-outline no-print" onclick="cancelAdd()">Cancel</button>
       </div>
-    </div>
-
-    <!-- Add Item Button -->
-    <div class="action-row no-print" id="addItemBtnRow" style="margin-bottom:14px;">
-      <button class="btn btn-primary" id="addItemBtn" onclick="showAddPanel()">+ Add Item</button>
-      <span class="item-count-note" id="itemCountNote">0 / 20 items</span>
     </div>
 
     <!-- Items List -->
