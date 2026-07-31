@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBB Invoice Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 28px 24px 32px;
+    }
+
+    /* ── Header ── */
+    /* ── Brand header ── */
+    .brand-header {
+      text-align: center;
+      padding: 18px 12px 14px;
+      border-bottom: 3px solid #7b1a1a;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #fff 60%, #fdf5f5 100%);
+      border-radius: 8px 8px 0 0;
+    }
+    .brand-name {
+      /* Cooper BT → Cooper Black (built-in on most OS) as fallback */
+      font-family: 'Cooper BT', 'CooperBT', 'Cooper Black', 'Arial Black', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: #7b1a1a;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+    .brand-tagline {
+      font-family: 'Brush Script MT', 'Segoe Script', cursive;
+      font-size: 1.15rem;
+      color: #b03030;
+      font-style: italic;
+      margin: 4px 0 10px;
+    }
+    .fssai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1.5px solid #c8a96e;
+      border-radius: 6px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      color: #4a3000;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .app-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a365d;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      display: none; /* replaced by brand-header */
+    }
+
+    /* ── Invoice number ── */
+    .invoice-header {
+      background: #1a365d;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .invoice-header .label { font-size: 0.78rem; letter-spacing: 1px; opacity: 0.75; text-transform: uppercase; }
+    .invoice-header .value { font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; }
+
+    /* ── Customer fields ── */
+    .section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #718096;
+      margin-bottom: 8px;
+      margin-top: 4px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.97rem;
+      color: #2d3748;
+      background: #f7fafc;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+      background: #fff;
+    }
+
+    /* ── Add item panel ── */
+    .add-item-panel {
+      border: 1.5px dashed #90cdf4;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #ebf8ff;
+      display: none;
+    }
+    .add-item-panel.open { display: block; }
+
+    .item-fields {
+      display: grid;
+      grid-template-columns: 1fr 90px 110px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 480px) {
+      .item-fields { grid-template-columns: 1fr; }
+    }
+
+    .item-fields select,
+    .item-fields input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.97rem;
+      color: #2d3748;
+      background: #f7fafc;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+    .item-fields select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23718096' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+    .item-fields select:focus,
+    .item-fields input[type="number"]:focus {
+      outline: none;
+      border-color: #3182ce;
+      background-color: #fff;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary   { background: #3182ce; color: #fff; }
+    .btn-primary:hover  { background: #2b6cb0; }
+    .btn-success   { background: #38a169; color: #fff; }
+    .btn-success:hover  { background: #2f855a; }
+    .btn-outline   { background: #fff; color: #3182ce; border: 1.5px solid #3182ce; }
+    .btn-outline:hover  { background: #ebf8ff; }
+    .btn-danger    { background: transparent; color: #e53e3e; border: none; padding: 4px 8px; font-size: 1.1rem; }
+    .btn-danger:hover   { color: #c53030; }
+    .btn-print     { background: #1a365d; color: #fff; width: 100%; padding: 13px; font-size: 1rem; border-radius: 10px; margin-top: 8px; }
+    .btn-print:hover    { background: #2a4a7f; }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .item-count-note {
+      font-size: 0.8rem;
+      color: #718096;
+      margin-left: auto;
+    }
+
+    /* ── Items table ── */
+    .items-section { margin-bottom: 20px; }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    .items-table thead tr {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+    .items-table th, .items-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .items-table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+    .items-table tbody tr:hover { background: #f7fafc; }
+    .items-table .col-qty, .items-table .col-price, .items-table .col-total { text-align: right; }
+    .items-table .col-action { text-align: center; width: 36px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 22px 0;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+    /* ── Grand total ── */
+    .grand-total-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      border-top: 2px solid #1a365d;
+      padding-top: 14px;
+      margin-top: 4px;
+    }
+    .grand-total-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .grand-total-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1a365d;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 20px 0;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; border-radius: 0; padding: 20px; max-width: 100%; }
+      .no-print { display: none !important; }
+      .add-item-panel { display: none !important; }
+      .brand-header { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      input[type="text"], textarea {
+        border: none;
+        background: transparent;
+        padding: 2px 0;
+      }
+      .items-table tbody tr:hover { background: none; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<div class="container">
+
+  <!-- Brand Header -->
+  <div class="brand-header">
+    <div class="brand-name">Beyond Blissful Bakes</div>
+    <div class="brand-tagline">your happiness our priority</div>
+    <div class="fssai-badge">
+      FSSAI &nbsp;|&nbsp; Lic. No.&nbsp;<strong>22726694000028</strong>
+    </div>
+  </div>
+
+  <h1 class="app-title">BBB Invoice Generator</h1>
+
+  <!-- Invoice Number -->
+  <div class="invoice-header">
+    <span class="label">Invoice No.</span>
+    <span class="value" id="invoiceNumber"></span>
+  </div>
+
+  <!-- Customer Info -->
+  <p class="section-title">Bill To</p>
+  <div class="field-group">
+    <input type="text" id="customerName" placeholder="Customer Name (optional)" />
+    <textarea id="customerAddress" rows="2" placeholder="Contact / Address (optional)"></textarea>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Items Section -->
+  <div class="items-section">
+    <p class="section-title">Items</p>
+
+    <!-- Add Item Panel -->
+    <div class="add-item-panel" id="addItemPanel">
+      <div class="item-fields">
+        <select id="itemName" onchange="onItemSelect()">
+          <option value="">— Select item —</option>
+        </select>
+        <input type="number" id="itemQty" placeholder="Qty" min="1" step="1" />
+        <input type="number" id="itemPrice" placeholder="Price (₹)" min="0" step="0.01" />
+      </div>
+      <!-- shown only when Other is selected -->
+      <div id="customItemRow" style="display:none; margin-bottom:10px;">
+        <input type="text" id="customItemName" placeholder="Enter item description" style="width:100%;" />
+      </div>
+      <div class="action-row">
+        <button class="btn btn-success" onclick="addItem()">+ Add</button>
+        <button class="btn btn-outline no-print" onclick="cancelAdd()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Add Item Button -->
+    <div class="action-row no-print" id="addItemBtnRow" style="margin-bottom:14px;">
+      <button class="btn btn-primary" id="addItemBtn" onclick="showAddPanel()">+ Add Item</button>
+      <span class="item-count-note" id="itemCountNote">0 / 20 items</span>
+    </div>
+
+    <!-- Items List -->
+    <table class="items-table" id="itemsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Description</th>
+          <th>Unit</th>
+          <th class="col-qty">Qty</th>
+          <th class="col-price">Price</th>
+          <th class="col-total">Total</th>
+          <th class="col-action no-print"></th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody">
+        <tr id="emptyRow">
+          <td colspan="6" class="empty-state">No items added yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Grand Total -->
+  <div class="grand-total-row">
+    <span class="grand-total-label">Grand Total</span>
+    <span class="grand-total-value" id="grandTotal">₹0.00</span>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Print & Snapshot Buttons -->
+  <div class="no-print" style="display:flex; gap:10px; margin-top:8px;">
+    <button class="btn btn-print" style="flex:1" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+    <button class="btn btn-print" style="flex:1; background:#2d6a4f;" onclick="captureSnapshot()">📸 Save as Image</button>
+  </div>
+
+</div>
+
+<script>
+  const MAX_ITEMS = 20;
+  let items = [];
+
+  const CATALOGUE = [
+    { name: 'Atta Biscuits',                    unit: '150g',   price: 50  },
+    { name: 'Oats Cookies',                     unit: '150g',   price: 50  },
+    { name: 'Chocolate Cookies',                unit: '150g',   price: 50  },
+    { name: 'Rose Pista Cookies',               unit: '150g',   price: 50  },
+    { name: 'Digestive Cookies',                unit: '150g',   price: 50  },
+    { name: 'Ragi Chocochips Cookies',          unit: '150g',   price: 50  },
+    { name: 'Coconut Cookies',                  unit: '150g',   price: 50  },
+    { name: 'Jowar Kaju Cookies',               unit: '150g',   price: 50  },
+    { name: 'Almond Cookies Sticks',            unit: '150g',   price: 50  },
+    { name: 'Mixed Seeds Atta Cookies',         unit: '150g',   price: 50  },
+    { name: 'Tutti Frutti Cake',                unit: '500g',   price: 250 },
+    { name: 'Vanilla Butter Cake',              unit: '500g',   price: 250 },
+    { name: 'Chocolate Walnut Cake',            unit: '500g',   price: 250 },
+    { name: 'Pineapple Cake',                   unit: '500g',   price: 250 },
+    { name: 'Fruit Sliced Cake',                unit: '500g',   price: 250 },
+    { name: 'Marble Cake',                      unit: '500g',   price: 250 },
+    { name: 'Chocolate Sliced Cake',            unit: '500g',   price: 250 },
+    { name: 'Vanilla Muffins',                  unit: '4 pcs.', price: 120 },
+    { name: 'Chocolate Muffins',                unit: '4 pcs.', price: 120 },
+    { name: 'Pineapple Muffins',                unit: '4 pcs.', price: 120 },
+    { name: 'Butterscotch Muffins',             unit: '4 pcs.', price: 120 },
+    { name: 'Dryfruits with Chocochip Muffins', unit: '4 pcs.', price: 120 },
+    { name: 'Kesar Pista Muffins',              unit: '4 pcs.', price: 120 },
+    { name: 'Muffins with Frosting',            unit: '4 pcs.', price: 200 },
+    { name: 'Energy Bar',                       unit: '250g',   price: 200 },
+    { name: 'Ajwan Cracker',                    unit: '150g',   price: 50  },
+    { name: 'Jeera Cracker',                    unit: '150g',   price: 50  },
+    { name: 'Spicy Masala Cracker',             unit: '150g',   price: 50  },
+    { name: 'Curry Leaves Crackers',            unit: '150g',   price: 50  },
+    { name: 'Plain Vanilla B/A Cake',           unit: '500g',   price: 350 },
+    { name: 'Plain Vanilla B/A Cake',           unit: '1kg',    price: 700 },
+    { name: 'Chocolate B/A Cake',               unit: '500g',   price: 400 },
+    { name: 'Chocolate B/A Cake',               unit: '1kg',    price: 800 },
+  ];
+
+  // Populate dropdown, with Other at the bottom
+  (function buildDropdown() {
+    const sel = document.getElementById('itemName');
+    CATALOGUE.forEach((p, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${p.name} (${p.unit}) — ₹${p.price}`;
+      sel.appendChild(opt);
+    });
+    const other = document.createElement('option');
+    other.value = 'other';
+    other.textContent = '✏️ Other / Custom item…';
+    sel.appendChild(other);
+  })();
+
+  function onItemSelect() {
+    const idx = document.getElementById('itemName').value;
+    const customRow = document.getElementById('customItemRow');
+    const priceEl   = document.getElementById('itemPrice');
+    if (idx === '') {
+      priceEl.value = '';
+      customRow.style.display = 'none';
+      return;
+    }
+    if (idx === 'other') {
+      priceEl.value = '';
+      customRow.style.display = 'block';
+      document.getElementById('customItemName').focus();
+      return;
+    }
+    customRow.style.display = 'none';
+    priceEl.value = CATALOGUE[idx].price;
+    document.getElementById('itemQty').focus();
+  }
+
+  // Generate invoice number from timestamp
+  function generateInvoiceNumber() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `INV-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  }
+
+  document.getElementById('invoiceNumber').textContent = generateInvoiceNumber();
+
+  function showAddPanel() {
+    if (items.length >= MAX_ITEMS) return;
+    document.getElementById('addItemPanel').classList.add('open');
+    document.getElementById('addItemBtnRow').style.display = 'none';
+    document.getElementById('itemName').focus();
+  }
+
+  function cancelAdd() {
+    clearPanel();
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+  }
+
+  function clearPanel() {
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemQty').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('customItemName').value = '';
+    document.getElementById('customItemRow').style.display = 'none';
+  }
+
+
+  function addItem() {
+    const idx   = document.getElementById('itemName').value;
+    const qty   = parseFloat(document.getElementById('itemQty').value);
+    const price = parseFloat(document.getElementById('itemPrice').value);
+
+    if (idx === '')         { alert('Please select an item.'); return; }
+    if (!qty || qty <= 0)   { alert('Please enter a valid quantity.'); return; }
+    if (isNaN(price) || price < 0) { alert('Please enter a valid price.'); return; }
+
+    let name, unit;
+    if (idx === 'other') {
+      name = document.getElementById('customItemName').value.trim();
+      if (!name) { alert('Please enter the item description.'); return; }
+      unit = '';
+    } else {
+      const product = CATALOGUE[idx];
+      name = product.name;
+      unit = product.unit;
+    }
+    items.push({ name, unit, qty, price });
+    renderItems();
+    clearPanel();
+
+    if (items.length >= MAX_ITEMS) {
+      document.getElementById('addItemPanel').classList.remove('open');
+      document.getElementById('addItemBtnRow').style.display = 'flex';
+      document.getElementById('addItemBtn').disabled = true;
+    } else {
+      cancelAdd();
+      // Keep panel workflow: go back to button
+    }
+  }
+
+  function removeItem(index) {
+    items.splice(index, 1);
+    renderItems();
+    document.getElementById('addItemBtn').disabled = false;
+  }
+
+  function renderItems() {
+    const tbody = document.getElementById('itemsBody');
+    tbody.innerHTML = '';
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr id="emptyRow"><td colspan="7" class="empty-state">No items added yet.</td></tr>';
+      document.getElementById('grandTotal').textContent = '₹0.00';
+      document.getElementById('itemCountNote').textContent = '0 / 20 items';
+      return;
+    }
+
+    let grand = 0;
+    items.forEach((item, i) => {
+      const lineTotal = item.qty * item.price;
+      grand += lineTotal;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.unit)}</td>
+        <td class="col-qty">${item.qty}</td>
+        <td class="col-price">₹${item.price.toFixed(2)}</td>
+        <td class="col-total">₹${lineTotal.toFixed(2)}</td>
+        <td class="col-action no-print">
+          <button class="btn btn-danger" onclick="removeItem(${i})" title="Remove">✕</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('grandTotal').textContent = `₹${grand.toFixed(2)}`;
+    document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Allow pressing Enter in qty/price fields to trigger add
+  ['itemQty','itemPrice'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') addItem();
+    });
+  });
+
+  function printInvoice() {
+    // Close add panel if open before printing
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+    window.print();
+  }
+  function captureSnapshot() {
+    // Close add panel before capture
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+    // Temporarily hide no-print elements
+    document.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'hidden');
+    html2canvas(document.querySelector('.container'), {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    }).then(canvas => {
+      document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+      const link = document.createElement('a');
+      link.download = `${document.getElementById('invoiceNumber').textContent}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }).catch(() => {
+      document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+      alert('Snapshot failed. Please try again.');
+    });
+  }
+
+</script>
+</body>
+</html>
