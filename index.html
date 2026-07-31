@@ -273,13 +273,36 @@
       margin: 20px 0;
     }
 
-    /* ── Stamp & Signature Section ── */
-    .stamp-section {
+    /* ── Invoice Footer (QR + Stamp on same line) ── */
+    .invoice-footer {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: flex-end;
-      padding: 16px 0 8px;
-      margin-top: 8px;
+      margin-top: 20px;
+      min-height: 120px;
+    }
+    .invoice-footer-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .invoice-footer-left.hidden { visibility: hidden; }
+    .payment-qr-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    #qrcodeContainer {
+      border: 2px solid #3182ce;
+      border-radius: 8px;
+      padding: 6px;
+      background: #fff;
+    }
+    #qrcodeContainer img, #qrcodeContainer canvas {
+      display: block;
     }
     .stamp-container {
       width: 75px;
@@ -291,41 +314,11 @@
       object-fit: contain;
     }
     .stamp-date {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #2d3748;
       font-family: Arial, sans-serif;
       margin-top: 4px;
       font-weight: 600;
-    }
-
-    /* ── Payment QR Section ── */
-    .payment-qr-section {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      margin-top: 28px;
-      padding: 20px;
-      border-top: 2px solid #1a365d;
-    }
-    .payment-qr-section.visible {
-      display: flex;
-    }
-    .payment-qr-label {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #1a365d;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    #qrcodeContainer {
-      border: 2px solid #3182ce;
-      border-radius: 8px;
-      padding: 8px;
-      background: #fff;
-    }
-    #qrcodeContainer img, #qrcodeContainer canvas {
-      display: block;
     }
 
     /* ── Print styles ── */
@@ -333,7 +326,7 @@
       body { background: #fff; padding: 0; }
       .container { box-shadow: none; border-radius: 0; padding: 20px; max-width: 100%; }
       .no-print { display: none !important; }
-      .payment-qr-section { display: none !important; }
+      
       .add-item-panel { display: none !important; }
       .brand-header { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .brand-header * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -437,14 +430,12 @@
     <span class="grand-total-value" id="grandTotal">₹0.00</span>
   </div>
 
-  <!-- Payment QR Section -->
-  <div class="payment-qr-section">
-    <div class="payment-qr-label">💳 Pay Here</div>
-    <div id="qrcodeContainer"></div>
-  </div>
-
-  <!-- Stamp & Signature -->
-  <div class="stamp-section">
+  <!-- Invoice Footer: QR (left) + Stamp/Signature (right) on same line -->
+  <div class="invoice-footer">
+    <div class="invoice-footer-left hidden" id="qrSection">
+      <div class="payment-qr-label">💳 Pay Here</div>
+      <div id="qrcodeContainer"></div>
+    </div>
     <div class="stamp-container">
       <img class="stamp-logo" src="signature.png" alt="BBB Stamp" />
       <div class="stamp-date" id="stampDate"></div>
@@ -621,7 +612,7 @@
       tbody.innerHTML = '<tr id="emptyRow"><td colspan="7" class="empty-state">No items added yet.</td></tr>';
       document.getElementById('grandTotal').textContent = '₹0.00';
       document.getElementById('itemCountNote').textContent = '0 / 20 items';
-      document.querySelector('.payment-qr-section').classList.remove('visible');
+      document.getElementById('qrSection').classList.add('hidden');
       return;
     }
 
@@ -647,12 +638,12 @@
     document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
     
     // Show QR section only if grand total > 0
-    const qrSection = document.querySelector('.payment-qr-section');
+    const qrSection = document.getElementById('qrSection');
     if (grand > 0) {
-      qrSection.classList.add('visible');
+      qrSection.classList.remove('hidden');
       generatePaymentQR();
     } else {
-      qrSection.classList.remove('visible');
+      qrSection.classList.add('hidden');
     }
   }
 
