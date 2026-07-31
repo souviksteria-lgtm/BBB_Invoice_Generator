@@ -273,6 +273,36 @@
       margin: 20px 0;
     }
 
+    /* ── Stamp & Signature Section ── */
+    .stamp-section {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      padding: 16px 0 8px;
+      margin-top: 8px;
+    }
+    .stamp-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+    }
+    .stamp-logo {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      opacity: 0.85;
+      border-radius: 50%;
+    }
+    .stamp-signature {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-10deg);
+      width: 120px;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
     /* ── Payment QR Section ── */
     .payment-qr-section {
       display: none;
@@ -416,6 +446,14 @@
   <div class="payment-qr-section">
     <div class="payment-qr-label">💳 Pay Here</div>
     <div id="qrcodeContainer"></div>
+  </div>
+
+  <!-- Stamp & Signature -->
+  <div class="stamp-section">
+    <div class="stamp-container">
+      <img class="stamp-logo" src="logo.png" alt="BBB Stamp" />
+      <img class="stamp-signature" src="signature.png" alt="Signature" />
+    </div>
   </div>
 
   <hr class="divider" />
