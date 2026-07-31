@@ -283,12 +283,19 @@
     }
     .stamp-container {
       width: 160px;
-      height: 160px;
+      text-align: center;
     }
     .stamp-logo {
       width: 160px;
       height: 160px;
       object-fit: contain;
+    }
+    .stamp-date {
+      font-size: 0.8rem;
+      color: #2d3748;
+      font-family: Arial, sans-serif;
+      margin-top: 4px;
+      font-weight: 600;
     }
 
     /* ── Payment QR Section ── */
@@ -440,6 +447,7 @@
   <div class="stamp-section">
     <div class="stamp-container">
       <img class="stamp-logo" src="signature.png" alt="BBB Stamp" />
+      <div class="stamp-date" id="stampDate"></div>
     </div>
   </div>
 
@@ -536,6 +544,13 @@
   }
 
   document.getElementById('invoiceNumber').textContent = generateInvoiceNumber();
+
+  // Set today's date below the stamp
+  (function setStampDate() {
+    const now = new Date();
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    document.getElementById('stampDate').textContent = now.toLocaleDateString('en-IN', options);
+  })();
 
   function showAddPanel() {
     if (items.length >= MAX_ITEMS) return;
