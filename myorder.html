@@ -276,6 +276,61 @@
       color: #1a365d;
     }
 
+    .total-price-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      border-top: 2px solid #1a365d;
+      padding-top: 14px;
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+    .total-price-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .total-price-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1a365d;
+    }
+
+    .advance-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+    .advance-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #advanceDiscount {
+      width: 120px;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a365d;
+      background: #f7fafc;
+      text-align: right;
+      transition: border-color 0.2s;
+    }
+    #advanceDiscount:focus {
+      outline: none;
+      border-color: #3182ce;
+      background: #fff;
+    }
+
     .divider {
       border: none;
       border-top: 1px solid #e2e8f0;
@@ -393,6 +448,18 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Total Price -->
+  <div class="total-price-row">
+    <span class="total-price-label">Total Price</span>
+    <span class="total-price-value" id="totalPrice">₹0.00</span>
+  </div>
+
+  <!-- Advance / Discount -->
+  <div class="advance-row">
+    <label class="advance-label" for="advanceDiscount">Advance / Discount (₹)</label>
+    <input type="number" id="advanceDiscount" placeholder="0.00" min="0" step="0.01" value="0" onchange="updateGrandTotal()" />
   </div>
 
   <!-- Grand Total -->
@@ -579,7 +646,9 @@
 
     if (items.length === 0) {
       tbody.innerHTML = '<tr id="emptyRow"><td colspan="7" class="empty-state">No items added yet.</td></tr>';
+      document.getElementById('totalPrice').textContent = '₹0.00';
       document.getElementById('grandTotal').textContent = '₹0.00';
+      document.getElementById('advanceDiscount').value = '0';
       document.getElementById('itemCountNote').textContent = '0 / 20 items';
       return;
     }
@@ -602,8 +671,22 @@
       tbody.appendChild(tr);
     });
 
-    document.getElementById('grandTotal').textContent = `₹${grand.toFixed(2)}`;
+    // Update total price
+    document.getElementById('totalPrice').textContent = `₹${grand.toFixed(2)}`;
+    
+    // Calculate grand total with advance/discount
+    updateGrandTotal();
+    
     document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
+  }
+
+  function updateGrandTotal() {
+    const totalPriceText = document.getElementById('totalPrice').textContent;
+    const totalPrice = parseFloat(totalPriceText.replace('₹', '').trim());
+    const advanceDiscount = parseFloat(document.getElementById('advanceDiscount').value) || 0;
+    
+    const finalGrandTotal = Math.max(0, totalPrice - advanceDiscount);
+    document.getElementById('grandTotal').textContent = `₹${finalGrandTotal.toFixed(2)}`;
   }
 
   function escapeHtml(str) {
