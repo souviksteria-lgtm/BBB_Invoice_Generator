@@ -176,16 +176,6 @@
       appearance: none;
     }
     .item-fields select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23718096' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
-    .item-fields select optgroup {
-      font-weight: 700;
-      color: #1a365d;
-      background: #edf2f7;
-    }
-    .item-fields select optgroup option {
-      font-weight: 400;
-      color: #2d3748;
-      background: #f7fafc;
-    }
     .item-fields select:focus,
     .item-fields input[type="number"]:focus {
       outline: none;
@@ -196,6 +186,7 @@
     .item-search-wrapper {
       position: relative;
       width: 100%;
+      margin-bottom: 8px;
     }
     #itemSearch {
       width: 100%;
@@ -207,7 +198,6 @@
       background: #f7fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
       background-size: 16px;
       transition: border-color 0.2s;
-      margin-bottom: 8px;
     }
     #itemSearch:focus {
       outline: none;
@@ -216,6 +206,126 @@
     }
     #itemSearch::placeholder {
       color: #a0aec0;
+    }
+
+    .custom-dropdown {
+      position: relative;
+      display: block;
+      width: 100%;
+    }
+    .dropdown-header {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      background: #f7fafc;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #2d3748;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .dropdown-header:hover {
+      border-color: #a0aec0;
+      background: #fff;
+    }
+    .dropdown-header.active {
+      border-color: #3182ce;
+      border-radius: 8px 8px 0 0;
+      background: #fff;
+    }
+    .dropdown-arrow {
+      font-size: 12px;
+      transition: transform 0.2s;
+      opacity: 0.6;
+    }
+    .dropdown-header.active .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    .dropdown-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      border: 1.5px solid #cbd5e0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      background: white;
+      max-height: 320px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    .dropdown-list.active {
+      display: block;
+    }
+    .category-group {
+      padding: 8px 0;
+    }
+    .category-label {
+      padding: 10px 14px 8px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: white;
+      cursor: default;
+      user-select: none;
+    }
+    .category-group.cookies .category-label { background: #d97706; }
+    .category-group.cakes .category-label { background: #dc2626; }
+    .category-group.muffins .category-label { background: #8b5cf6; }
+    .category-group.cream .category-label { background: #d946ef; }
+    .category-group.specialties .category-label { background: #f59e0b; }
+
+    .category-group.cookies .dropdown-item { background: #fef3c7; border-left: 3px solid #d97706; }
+    .category-group.cakes .dropdown-item { background: #fee2e2; border-left: 3px solid #dc2626; }
+    .category-group.muffins .dropdown-item { background: #ede9fe; border-left: 3px solid #8b5cf6; }
+    .category-group.cream .dropdown-item { background: #fce7f3; border-left: 3px solid #d946ef; }
+    .category-group.specialties .dropdown-item { background: #fef08a; border-left: 3px solid #f59e0b; }
+
+    .dropdown-item {
+      padding: 9px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #2d3748;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .dropdown-item:hover {
+      font-weight: 500;
+      padding-left: 16px;
+    }
+    .dropdown-item.selected {
+      font-weight: 600;
+      opacity: 0.95;
+    }
+    .dropdown-item-other {
+      padding: 9px 14px;
+      background: #f7fafc;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #2d3748;
+      border-top: 1px solid #e2e8f0;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .dropdown-item-other:hover {
+      padding-left: 16px;
+      font-weight: 500;
+      background: #edf2f7;
+    }
+    .dropdown-item-other.selected {
+      font-weight: 600;
+      border-left-color: #7b1a1a;
     }
 
     /* ── Buttons ── */
@@ -502,11 +612,16 @@
       </div>
 
       <div class="item-fields">
-        <select id="itemName" onchange="onItemSelect()">
-          <option value="">— Select item —</option>
-        </select>
+        <div class="custom-dropdown" id="itemNameDropdown">
+          <div class="dropdown-header" id="dropdownHeader">
+            <span id="dropdownText">— Select item —</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-list" id="dropdownList"></div>
+        </div>
         <input type="number" id="itemQty" placeholder="Qty" min="1" step="1" value="1" />
         <input type="number" id="itemPrice" placeholder="Price (₹)" min="0" step="0.01" />
+        <input type="hidden" id="itemName" />
       </div>
       <!-- shown only when Other is selected -->
       <div id="customItemRow" style="display:none; margin-bottom:10px;">
@@ -609,8 +724,8 @@
 
   // Populate dropdown, with Other at the bottom
   function buildDropdown() {
-    const sel = document.getElementById('itemName');
-    sel.innerHTML = '<option value="">— Select item —</option>';
+    const dropdownList = document.getElementById('dropdownList');
+    dropdownList.innerHTML = '';
     
     // Group items by category
     const categories = {};
@@ -621,52 +736,111 @@
       categories[item.category].push({ idx, item });
     });
     
-    // Add optgroups for each category
-    Object.keys(categories).sort().forEach(category => {
-      const optgroup = document.createElement('optgroup');
-      optgroup.label = category;
+    // Add category groups
+    const categoryOrder = ['Cookies & Crackers', 'Dry Cakes', 'Muffins', 'Specialties', 'Cream Cakes'];
+    categoryOrder.forEach(category => {
+      if (!categories[category]) return;
+      
+      const catClass = category.toLowerCase()
+        .replace(/&/g, '')
+        .replace(/\s+/g, '')
+        .match(/^(cookies)|(cakes)|(muffins)|(specialties)|(cream)/);
+      let classKey = catClass ? catClass[0] : '';
+      if (classKey === 'cakes') classKey = 'cakes';
+      if (category === 'Cream Cakes') classKey = 'cream';
+      
+      const group = document.createElement('div');
+      group.className = `category-group ${classKey}`;
+      
+      const label = document.createElement('div');
+      label.className = 'category-label';
+      label.textContent = category;
+      group.appendChild(label);
       
       categories[category].forEach(({ idx, item }) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = `${item.name} (${item.unit}) — ₹${item.price}`;
-        optgroup.appendChild(opt);
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'dropdown-item';
+        itemDiv.dataset.index = idx;
+        itemDiv.textContent = `${item.name} (${item.unit}) — ₹${item.price}`;
+        itemDiv.onclick = () => selectDropdownItem(idx, item);
+        group.appendChild(itemDiv);
       });
       
-      sel.appendChild(optgroup);
+      dropdownList.appendChild(group);
     });
     
-    // Add "Other" option at the end
-    const other = document.createElement('option');
-    other.value = 'other';
-    other.textContent = '✏️ Other / Custom item…';
-    sel.appendChild(other);
+    // Add "Other" option
+    const otherDiv = document.createElement('div');
+    otherDiv.className = 'dropdown-item-other';
+    otherDiv.dataset.index = 'other';
+    otherDiv.textContent = '✏️ Other / Custom item…';
+    otherDiv.onclick = () => selectDropdownItem('other', null);
+    dropdownList.appendChild(otherDiv);
+    
+    // Setup dropdown toggle
+    document.getElementById('dropdownHeader').addEventListener('click', toggleDropdown);
+    document.addEventListener('click', closeDropdownOnClickOutside);
+  }
+  
+  function toggleDropdown() {
+    const header = document.getElementById('dropdownHeader');
+    const list = document.getElementById('dropdownList');
+    header.classList.toggle('active');
+    list.classList.toggle('active');
+  }
+  
+  function closeDropdownOnClickOutside(e) {
+    const dropdown = document.getElementById('itemNameDropdown');
+    const header = document.getElementById('dropdownHeader');
+    const list = document.getElementById('dropdownList');
+    
+    if (!dropdown.contains(e.target)) {
+      header.classList.remove('active');
+      list.classList.remove('active');
+    }
+  }
+  
+  function selectDropdownItem(idx, item) {
+    document.getElementById('itemName').value = idx;
+    document.getElementById('dropdownHeader').classList.remove('active');
+    document.getElementById('dropdownList').classList.remove('active');
+    
+    // Update display text
+    const text = idx === 'other' ? '✏️ Other / Custom item…' : `${item.name} (${item.unit}) — ₹${item.price}`;
+    document.getElementById('dropdownText').textContent = text;
+    
+    // Update selected styling
+    document.querySelectorAll('.dropdown-item, .dropdown-item-other').forEach(el => {
+      el.classList.remove('selected');
+    });
+    document.querySelector(`[data-index="${idx}"]`).classList.add('selected');
+    
+    onItemSelect();
   }
 
   function searchItems() {
     const searchQuery = document.getElementById('itemSearch').value.toLowerCase().trim();
-    const select = document.getElementById('itemName');
-    const optgroups = select.querySelectorAll('optgroup');
+    const groups = document.querySelectorAll('.category-group');
     
-    optgroups.forEach(optgroup => {
+    groups.forEach(group => {
       let visibleCount = 0;
-      const options = optgroup.querySelectorAll('option');
+      const items = group.querySelectorAll('.dropdown-item');
       
-      options.forEach(option => {
-        const catalogueIndex = option.value;
-        const item = CATALOGUE[catalogueIndex];
-        const itemText = `${item.name} ${item.unit} ₹${item.price} ${item.category}`.toLowerCase();
+      items.forEach(item => {
+        const catalogueIndex = item.dataset.index;
+        const catalogueItem = CATALOGUE[catalogueIndex];
+        const itemText = `${catalogueItem.name} ${catalogueItem.unit} ₹${catalogueItem.price} ${catalogueItem.category}`.toLowerCase();
         
         if (searchQuery === '' || itemText.includes(searchQuery)) {
-          option.style.display = '';
+          item.style.display = '';
           visibleCount++;
         } else {
-          option.style.display = 'none';
+          item.style.display = 'none';
         }
       });
       
-      // Show/hide optgroup based on visible items
-      optgroup.style.display = visibleCount > 0 ? '' : 'none';
+      // Show/hide category group based on visible items
+      group.style.display = visibleCount > 0 ? '' : 'none';
     });
   }
 
@@ -714,7 +888,7 @@
     document.getElementById('addItemBtnRow').style.display = 'none';
     document.getElementById('itemSearch').value = '';
     searchItems(); // Reset search
-    document.getElementById('itemName').focus();
+    document.getElementById('dropdownHeader').focus();
   }
 
   function cancelAdd() {
@@ -725,6 +899,12 @@
 
   function clearPanel() {
     document.getElementById('itemName').value = '';
+    document.getElementById('dropdownText').textContent = '— Select item —';
+    document.getElementById('dropdownHeader').classList.remove('active');
+    document.getElementById('dropdownList').classList.remove('active');
+    document.querySelectorAll('.dropdown-item, .dropdown-item-other').forEach(el => {
+      el.classList.remove('selected');
+    });
     document.getElementById('itemQty').value = '';
     document.getElementById('itemPrice').value = '';
     document.getElementById('customItemName').value = '';
