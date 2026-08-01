@@ -681,7 +681,7 @@
   }
 
   // Load catalogue on page load
-  loadCatalogue();
+  document.addEventListener('DOMContentLoaded', loadCatalogue);
 
   // Populate dropdown, with Other at the bottom
   function buildDropdown() {
