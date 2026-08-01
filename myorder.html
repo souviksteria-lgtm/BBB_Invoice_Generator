@@ -658,8 +658,8 @@
         const orderNumber = document.getElementById('orderNumber').textContent;
         const file = new File([blob], `${orderNumber}.png`, { type: 'image/png' });
         
-        // Open WhatsApp targeting the phone number 8826548216
-        const phoneNumber = '8826548216';
+        // Open WhatsApp targeting the phone number 8826548216 with country code for India
+        const phoneNumber = '918826548216'; // +91 country code for India
         const message = encodeURIComponent(`📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`);
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
         window.open(whatsappUrl, '_blank');
