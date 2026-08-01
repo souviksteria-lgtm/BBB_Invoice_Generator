@@ -647,9 +647,9 @@
         <input type="hidden" id="itemName" />
       </div>
       <!-- shown only when Other is selected -->
-      <div id="customItemRow" style="display:none; margin-bottom:10px;">
-        <input type="text" id="customItemName" placeholder="Enter item description" style="width:100%; margin-bottom:8px;" />
-        <input type="text" id="customItemUnit" placeholder="Enter unit (e.g., 250g, 4 pcs., 500ml)" style="width:100%;" />
+      <div id="customItemRow" style="display:none; margin-bottom:10px; gap:10px;">
+        <input type="text" id="customItemName" placeholder="Enter item description" style="flex:1;" />
+        <input type="text" id="customItemUnit" placeholder="Enter unit (e.g., 250g, 4 pcs., 500ml)" style="flex:0 0 110px;" />
       </div>
       <div class="action-row">
         <button class="btn btn-success" onclick="addItem()">+ Add</button>
@@ -889,7 +889,7 @@
     }
     if (idx === 'other') {
       priceEl.value = '';
-      customRow.style.display = 'block';
+      customRow.style.display = 'flex';
       document.getElementById('customItemName').focus();
       return;
     }
