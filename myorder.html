@@ -487,50 +487,28 @@
 <script>
   const MAX_ITEMS = 20;
   let items = [];
+  let CATALOGUE = [];
 
-  const CATALOGUE = [
-    { name: 'Atta Biscuits',                    unit: '150g',   price: 50  },
-    { name: 'Nankhatai',                        unit: '250g',   price: 200 },
-    { name: 'Oats Cookies',                     unit: '150g',   price: 50  },
-    { name: 'Chocolate Cookies',                unit: '150g',   price: 50  },
-    { name: 'Rose Pista Cookies',               unit: '150g',   price: 50  },
-    { name: 'Digestive Cookies',                unit: '150g',   price: 50  },
-    { name: 'Ragi Chocochips Cookies',          unit: '150g',   price: 50  },
-    { name: 'Coconut Cookies',                  unit: '150g',   price: 50  },
-    { name: 'Jowar Kaju Cookies',               unit: '150g',   price: 50  },
-    { name: 'Almond Cookies Sticks',            unit: '150g',   price: 50  },
-    { name: 'Mixed Seeds Atta Cookies',         unit: '150g',   price: 50  },
-    { name: 'Peanut Sesame Cookies',            unit: '150g',   price: 80  },
-    { name: 'Tutti Frutti Cake',                unit: '500g',   price: 250 },
-    { name: 'Vanilla Butter Cake',              unit: '500g',   price: 250 },
-    { name: 'Chocolate Walnut Cake',            unit: '500g',   price: 250 },
-    { name: 'Mango Cake',                       unit: '500g',   price: 450 },
-    { name: 'Pineapple Cake',                   unit: '500g',   price: 250 },
-    { name: 'Pineapple Cake',                   unit: '500g',   price: 450 },
-    { name: 'Fruit Sliced Cake',                unit: '500g',   price: 250 },
-    { name: 'Marble Cake',                      unit: '500g',   price: 250 },
-    { name: 'Chocolate Sliced Cake',            unit: '500g',   price: 250 },
-    { name: 'Vanilla Muffins',                  unit: '4 pcs.', price: 120 },
-    { name: 'Chocolate Muffins',                unit: '4 pcs.', price: 120 },
-    { name: 'Pineapple Muffins',                unit: '4 pcs.', price: 120 },
-    { name: 'Butterscotch Muffins',             unit: '4 pcs.', price: 120 },
-    { name: 'Dryfruits with Chocochip Muffins', unit: '4 pcs.', price: 120 },
-    { name: 'Kesar Pista Muffins',              unit: '4 pcs.', price: 120 },
-    { name: 'Muffins with Frosting',            unit: '4 pcs.', price: 200 },
-    { name: 'Energy Bar',                       unit: '250g',   price: 200 },
-    { name: 'Ajwan Cracker',                    unit: '150g',   price: 50  },
-    { name: 'Jeera Cracker',                    unit: '150g',   price: 50  },
-    { name: 'Spicy Masala Cracker',             unit: '150g',   price: 50  },
-    { name: 'Curry Leaves Crackers',            unit: '150g',   price: 50  },
-    { name: 'Plain Vanilla B/A Cake',           unit: '500g',   price: 350 },
-    { name: 'Plain Vanilla B/A Cake',           unit: '1kg',    price: 700 },
-    { name: 'Chocolate B/A Cake',               unit: '500g',   price: 400 },
-    { name: 'Chocolate B/A Cake',               unit: '1kg',    price: 800 },
-  ];
+  // Load catalogue from JSON file
+  async function loadCatalogue() {
+    try {
+      const response = await fetch('catalogue.json');
+      const data = await response.json();
+      CATALOGUE = data.items;
+      buildDropdown();
+    } catch (error) {
+      console.error('Failed to load catalogue:', error);
+      alert('Failed to load product catalogue. Please refresh the page.');
+    }
+  }
+
+  // Load catalogue on page load
+  loadCatalogue();
 
   // Populate dropdown, with Other at the bottom
-  (function buildDropdown() {
+  function buildDropdown() {
     const sel = document.getElementById('itemName');
+    sel.innerHTML = '<option value="">— Select item —</option>';
     CATALOGUE.forEach((p, i) => {
       const opt = document.createElement('option');
       opt.value = i;
@@ -541,7 +519,7 @@
     other.value = 'other';
     other.textContent = '✏️ Other / Custom item…';
     sel.appendChild(other);
-  })();
+  }
 
   function onItemSelect() {
     const idx = document.getElementById('itemName').value;
