@@ -465,9 +465,10 @@
   <hr class="divider" />
 
   <!-- Print & Snapshot Buttons -->
-  <div class="no-print" style="display:flex; gap:10px; margin-top:8px;">
-    <button class="btn btn-print" style="flex:1" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
-    <button class="btn btn-print" style="flex:1; background:#2d6a4f;" onclick="captureSnapshot()">📸 Save as Image</button>
+  <div class="no-print" style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+    <button class="btn btn-print" style="flex:1; min-width:140px;" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+    <button class="btn btn-print" style="flex:1; min-width:140px; background:#2d6a4f;" onclick="captureSnapshot()">📸 Save as Image</button>
+    <button class="btn btn-print" style="flex:1; min-width:140px; background:#25d366;" onclick="shareOnWhatsApp()">💬 Share on WhatsApp</button>
   </div>
 
   <!-- Copyright Footer -->
@@ -716,6 +717,57 @@
     }).catch(() => {
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
       alert('Snapshot failed. Please try again.');
+    });
+  }
+
+  function shareOnWhatsApp() {
+    // Close add panel before capture
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+    // Temporarily hide no-print elements
+    document.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'hidden');
+    
+    html2canvas(document.querySelector('.container'), {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    }).then(canvas => {
+      document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+      
+      canvas.toBlob(blob => {
+        const invoiceNumber = document.getElementById('invoiceNumber').textContent;
+        const file = new File([blob], `${invoiceNumber}.png`, { type: 'image/png' });
+        
+        // Check if Web Share API is available
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            title: 'BBB Invoice',
+            text: `Invoice ${invoiceNumber} from Beyond Blissful Bakes`,
+            files: [file]
+          }).catch(err => {
+            if (err.name !== 'AbortError') {
+              console.error('Share failed:', err);
+            }
+          });
+        } else {
+          // Fallback: Open WhatsApp Web and show instructions
+          const message = encodeURIComponent(`📋 *Invoice ${invoiceNumber}* from Beyond Blissful Bakes\n\nPlease download the invoice image to view details.`);
+          const whatsappUrl = `https://web.whatsapp.com/send?text=${message}`;
+          window.open(whatsappUrl, '_blank');
+          
+          // Also download the image for manual attachment
+          setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = `${invoiceNumber}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('WhatsApp has opened. Please attach the downloaded invoice image to your message.');
+          }, 500);
+        }
+      }, 'image/png');
+    }).catch(() => {
+      document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+      alert('Failed to capture invoice. Please try again.');
     });
   }
 
