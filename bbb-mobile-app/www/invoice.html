@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBB Invoice Generator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+      padding: 8px 16px 12px;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 12px 20px 24px;
+    }
+
+    /* ── Header ── */
+    /* ── Brand header ── */
+    .brand-header {
+      text-align: center;
+      padding: 8px 10px 6px;
+      border-bottom: 3px solid #7b1a1a;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 60%, #fdf5f5 100%);
+      border-radius: 8px 8px 0 0;
+    }
+    .brand-name {
+      /* Cooper BT → Cooper Black (built-in on most OS) as fallback */
+      font-family: 'Cooper BT', 'CooperBT', 'Cooper Black', 'Arial Black', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: #7b1a1a;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+    .brand-byline {
+      font-size: 0.75rem;
+      color: #7b1a1a;
+      font-family: Arial, 'Segoe UI', sans-serif;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0px;
+    }
+    .brand-tagline {
+      font-family: 'Brush Script MT', 'Segoe Script', cursive;
+      font-size: 1rem;
+      color: #b03030;
+      font-style: italic;
+      margin: 2px 0 6px;
+    }
+    .fssai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff;
+      border: 1.5px solid #c8a96e;
+      border-radius: 6px;
+      padding: 5px 14px;
+      font-size: 0.82rem;
+      color: #000 !important;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      font-family: Arial, 'Segoe UI', sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .fssai-badge * {
+      color: #000 !important;
+      font-family: Arial, 'Segoe UI', sans-serif;
+    }
+
+    .app-title {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a365d;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      display: none; /* replaced by brand-header */
+    }
+
+    /* ── Invoice number ── */
+    .invoice-header {
+      background: #1a365d;
+      color: #fff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+    .invoice-header .label { font-size: 0.7rem; letter-spacing: 1px; opacity: 0.75; text-transform: uppercase; }
+    .invoice-header .value { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; }
+
+    /* ── Customer fields ── */
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #718096;
+      margin-bottom: 6px;
+      margin-top: 2px;
+    }
+
+    .field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      background: #f7fafc;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    input[type="text"]:focus, textarea:focus {
+      outline: none;
+      border-color: #3182ce;
+      background: #fff;
+    }
+
+    /* ── Add item panel ── */
+    .add-item-panel {
+      border: 1.5px dashed #90cdf4;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      background: #ebf8ff;
+      display: none;
+    }
+    .add-item-panel.open { display: block; }
+
+    .item-fields {
+      display: grid;
+      grid-template-columns: 1fr 90px 110px;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 480px) {
+      .item-fields { grid-template-columns: 1fr; }
+    }
+
+    .item-fields select,
+    .item-fields input[type="number"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      background: #f7fafc;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+    .item-fields select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23718096' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+    .item-fields select:focus,
+    .item-fields input[type="number"]:focus {
+      outline: none;
+      border-color: #3182ce;
+      background-color: #fff;
+    }
+
+    .item-search-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    #itemSearch {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      background: #f7fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+      background-size: 16px;
+      transition: border-color 0.2s;
+    }
+    #itemSearch:focus {
+      outline: none;
+      border-color: #3182ce;
+      background-color: #fff;
+    }
+    #itemSearch::placeholder {
+      color: #a0aec0;
+    }
+
+    .dropdown-search {
+      padding: 8px 8px 6px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f7fafc;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .dropdown-search input {
+      width: 100%;
+      padding: 7px 11px 7px 32px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #2d3748;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 9px center;
+      background-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .dropdown-search input:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+    }
+    .dropdown-search input::placeholder {
+      color: #a0aec0;
+    }
+
+    .custom-dropdown {
+      position: relative;
+      display: block;
+      width: 100%;
+    }
+    .dropdown-header {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      background: #f7fafc;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #2d3748;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+    .dropdown-header:hover {
+      border-color: #a0aec0;
+      background: #fff;
+    }
+    .dropdown-header.active {
+      border-color: #3182ce;
+      border-radius: 8px 8px 0 0;
+      background: #fff;
+    }
+    .dropdown-arrow {
+      font-size: 12px;
+      transition: transform 0.2s;
+      opacity: 0.6;
+    }
+    .dropdown-header.active .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    .dropdown-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      border: 1.5px solid #cbd5e0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      background: white;
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    .dropdown-list.active {
+      display: block;
+    }
+    .category-group {
+      padding: 6px 0;
+    }
+    .category-label {
+      padding: 6px 10px 5px;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: white;
+      cursor: default;
+      user-select: none;
+    }
+    .category-group.cookies .category-label { background: #d97706; }
+    .category-group.cakes .category-label { background: #dc2626; }
+    .category-group.muffins .category-label { background: #8b5cf6; }
+    .category-group.cream .category-label { background: #d946ef; }
+    .category-group.specialties .category-label { background: #f59e0b; }
+
+    .category-group.cookies .dropdown-item { background: #fef3c7; border-left: 3px solid #d97706; }
+    .category-group.cakes .dropdown-item { background: #fee2e2; border-left: 3px solid #dc2626; }
+    .category-group.muffins .dropdown-item { background: #ede9fe; border-left: 3px solid #8b5cf6; }
+    .category-group.cream .dropdown-item { background: #fce7f3; border-left: 3px solid #d946ef; }
+    .category-group.specialties .dropdown-item { background: #fef08a; border-left: 3px solid #f59e0b; }
+
+    .dropdown-item {
+      padding: 7px 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #2d3748;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .dropdown-item:hover {
+      font-weight: 500;
+      padding-left: 16px;
+    }
+    .dropdown-item.selected {
+      font-weight: 600;
+      opacity: 0.95;
+    }
+    .dropdown-item-other {
+      padding: 7px 12px;
+      background: #f7fafc;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #2d3748;
+      border-top: 1px solid #e2e8f0;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .dropdown-item-other:hover {
+      padding-left: 16px;
+      font-weight: 500;
+      background: #edf2f7;
+    }
+    .dropdown-item-other.selected {
+      font-weight: 600;
+      border-left-color: #7b1a1a;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.1s;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary   { background: #3182ce; color: #fff; }
+    .btn-primary:hover  { background: #2b6cb0; }
+    .btn-success   { background: #38a169; color: #fff; }
+    .btn-success:hover  { background: #2f855a; }
+    .btn-outline   { background: #fff; color: #3182ce; border: 1.5px solid #3182ce; }
+    .btn-outline:hover  { background: #ebf8ff; }
+    .btn-danger    { background: transparent; color: #e53e3e; border: none; padding: 4px 8px; font-size: 1.1rem; }
+    .btn-danger:hover   { color: #c53030; }
+    .btn-print     { background: #1a365d; color: #fff; width: 100%; padding: 13px; font-size: 1rem; border-radius: 10px; margin-top: 8px; }
+    .btn-print:hover    { background: #2a4a7f; }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .item-count-note {
+      font-size: 0.8rem;
+      color: #718096;
+      margin-left: auto;
+    }
+
+    /* ── Items table ── */
+    .items-section { margin-bottom: 20px; }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .items-table thead tr {
+      background: #edf2f7;
+      color: #4a5568;
+    }
+    .items-table th, .items-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .items-table th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+    .items-table tbody tr:hover { background: #f7fafc; }
+    .items-table .col-qty, .items-table .col-price, .items-table .col-total { text-align: right; }
+    .items-table .col-action { text-align: center; width: 36px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 22px 0;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+
+    /* ── Grand total ── */
+    .grand-total-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      border-top: 2px solid #1a365d;
+      padding-top: 14px;
+      margin-top: 4px;
+    }
+    .grand-total-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .grand-total-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #1a365d;
+    }
+
+    .total-price-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      border-top: 2px solid #1a365d;
+      padding-top: 14px;
+      margin-top: 4px;
+      margin-bottom: 12px;
+    }
+    .total-price-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .total-price-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #1a365d;
+    }
+
+    .advance-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+    .advance-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    #advanceDiscount {
+      width: 120px;
+      padding: 8px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a365d;
+      background: #f7fafc;
+      text-align: right;
+      transition: border-color 0.2s;
+    }
+    #advanceDiscount:focus {
+      outline: none;
+      border-color: #3182ce;
+      background: #fff;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 20px 0;
+    }
+
+    /* ── Invoice Footer (QR + Stamp on same line) ── */
+    .invoice-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 8px;
+      min-height: 100px;
+    }
+    .invoice-footer-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .invoice-footer-left.hidden { visibility: hidden; }
+    .payment-qr-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    #qrcodeContainer {
+      border: 2px solid #3182ce;
+      border-radius: 8px;
+      padding: 6px;
+      background: #fff;
+    }
+    #qrcodeContainer img, #qrcodeContainer canvas {
+      display: block;
+    }
+    .stamp-container {
+      width: 75px;
+      text-align: center;
+    }
+    .stamp-logo {
+      width: 75px;
+      height: 75px;
+      object-fit: contain;
+    }
+    .stamp-date {
+      font-size: 0.75rem;
+      color: #2d3748;
+      font-family: Arial, sans-serif;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .copyright-footer {
+      text-align: center;
+      margin-top: 16px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.75rem;
+      color: #718096;
+      font-family: Arial, sans-serif;
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; border-radius: 0; padding: 20px; max-width: 100%; }
+      .no-print { display: none !important; }
+      .invoice-footer-left { display: none !important; }
+      .add-item-panel { display: none !important; }
+      .brand-header { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .brand-header * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .brand-name { color: #7b1a1a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .brand-tagline { color: #b03030 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .fssai-badge { color: #000 !important; border: 1px solid #999 !important; background: #fff !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .fssai-badge strong { color: #000 !important; }
+      input[type="text"], textarea {
+        border: none;
+        background: transparent;
+        padding: 2px 0;
+      }
+      .items-table tbody tr:hover { background: none; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="cordova.js"></script>
+</head>
+<body>
+<div class="container">
+
+  <!-- Brand Header -->
+  <div class="brand-header">
+    <div class="brand-name">Beyond Blissful Bakes</div>
+    <div class="brand-byline">By Baisakhi</div>
+    <div class="brand-tagline">your happiness our priority</div>
+    <div class="fssai-badge">
+      FSSAI &nbsp;|&nbsp; Lic. No.&nbsp;22726694000028
+    </div>
+  </div>
+
+  <h1 class="app-title">BBB Invoice Generator</h1>
+
+  <!-- Invoice Number -->
+  <div class="invoice-header">
+    <span class="label">Invoice No.</span>
+    <span class="value" id="invoiceNumber"></span>
+  </div>
+
+  <!-- Customer Info -->
+  <p class="section-title">Bill To</p>
+  <div class="field-group">
+    <input type="text" id="customerName" placeholder="Customer Name (optional)" />
+    <textarea id="customerAddress" rows="1" placeholder="Contact / Address (optional)"></textarea>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Items Section -->
+  <div class="items-section">
+    <!-- Add Item Button -->
+    <div class="action-row no-print" id="addItemBtnRow" style="margin-bottom:8px;">
+      <button class="btn btn-primary" id="addItemBtn" onclick="showAddPanel()">+ Add Item</button>
+      <span class="item-count-note" id="itemCountNote">0 / 20 items</span>
+    </div>
+
+    <p class="section-title">Items</p>
+
+    <!-- Add Item Panel -->
+    <div class="add-item-panel" id="addItemPanel">
+      <div class="item-fields">
+        <div class="custom-dropdown" id="itemNameDropdown">
+          <div class="dropdown-header" id="dropdownHeader">
+            <span id="dropdownText">— Select item —</span>
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <div class="dropdown-list" id="dropdownList"></div>
+        </div>
+        <input type="number" id="itemQty" placeholder="Qty" min="1" step="1" value="1" />
+        <input type="number" id="itemPrice" placeholder="Price (₹)" min="0" step="0.01" />
+        <input type="hidden" id="itemName" />
+      </div>
+      <!-- shown only when Other is selected -->
+      <div id="customItemRow" style="display:none; margin-bottom:10px; gap:10px;">
+        <input type="text" id="customItemName" placeholder="Enter item description" style="flex:1;" />
+        <input type="text" id="customItemUnit" placeholder="Enter unit (e.g., 250g, 4 pcs., 500ml)" style="flex:0 0 110px;" />
+      </div>
+      <div class="action-row">
+        <button class="btn btn-success" onclick="addItem()">+ Add</button>
+        <button class="btn btn-outline no-print" onclick="cancelAdd()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <table class="items-table" id="itemsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Description</th>
+          <th>Unit</th>
+          <th class="col-qty">Qty</th>
+          <th class="col-price">Price</th>
+          <th class="col-total">Total</th>
+          <th class="col-action no-print"></th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody">
+        <tr id="emptyRow">
+          <td colspan="6" class="empty-state">No items added yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Total Price -->
+  <div class="total-price-row">
+    <span class="total-price-label">Total Price</span>
+    <span class="total-price-value" id="totalPrice">₹0.00</span>
+  </div>
+
+  <!-- Advance / Discount -->
+  <div class="advance-row">
+    <label class="advance-label" for="advanceDiscount">Advance / Discount (₹)</label>
+    <input type="number" id="advanceDiscount" placeholder="0.00" min="0" step="0.01" value="0" onchange="updateGrandTotal()" />
+  </div>
+
+  <!-- Grand Total -->
+  <div class="grand-total-row">
+    <span class="grand-total-label">Grand Total</span>
+    <span class="grand-total-value" id="grandTotal">₹0.00</span>
+  </div>
+
+  <!-- Invoice Footer: QR (left) + Stamp/Signature (right) on same line -->
+  <div class="invoice-footer">
+    <div class="invoice-footer-left hidden" id="qrSection">
+      <div class="payment-qr-label">💳 Pay Here</div>
+      <div id="qrcodeContainer"></div>
+    </div>
+    <div class="stamp-container">
+      <img class="stamp-logo" src="signature.png" alt="BBB Stamp" />
+      <div class="stamp-date" id="stampDate"></div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Print & Snapshot Buttons -->
+  <div class="no-print" style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+    <button class="btn btn-print" style="flex:1; min-width:140px;" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+    <button class="btn btn-print" style="flex:1; min-width:140px; background:#2d6a4f;" onclick="captureSnapshot()">📸 Save as Image</button>
+    <button class="btn btn-print" style="flex:1; min-width:140px; background:#25d366;" onclick="shareOnWhatsApp()">💬 Share on WhatsApp</button>
+  </div>
+
+  <!-- Copyright Footer -->
+  <div class="copyright-footer">
+    &copy; <span id="copyrightYear"></span> Beyond Blissful Bakes &bull; By Baisakhi
+  </div>
+
+</div>
+
+<script>
+  let isCordovaReady = false;
+  document.addEventListener('deviceready', function () { isCordovaReady = true; }, false);
+
+  const MAX_ITEMS = 20;
+  let items = [];
+  let CATALOGUE = [];
+
+  // Load catalogue from JSON file
+  async function loadCatalogue() {
+    try {
+      const response = await fetch('catalogue.json');
+      const data = await response.json();
+      CATALOGUE = data.items;
+      buildDropdown();
+    } catch (error) {
+      console.error('Failed to load catalogue:', error);
+      alert('Failed to load product catalogue. Please refresh the page.');
+    }
+  }
+
+  // Load catalogue on page load
+  document.addEventListener('DOMContentLoaded', loadCatalogue);
+
+  // Populate dropdown, with Other at the bottom
+  function buildDropdown() {
+    const dropdownList = document.getElementById('dropdownList');
+    dropdownList.innerHTML = '';
+    
+    // Add search box at top
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'dropdown-search';
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.id = 'itemSearch';
+    searchInput.placeholder = '🔍 Search items...';
+    searchInput.onkeyup = () => searchItems();
+    searchContainer.appendChild(searchInput);
+    dropdownList.appendChild(searchContainer);
+    
+    // Group items by category
+    const categories = {};
+    CATALOGUE.forEach((item, idx) => {
+      if (!categories[item.category]) {
+        categories[item.category] = [];
+      }
+      categories[item.category].push({ idx, item });
+    });
+    
+    // Add category groups
+    const categoryOrder = ['Cookies & Crackers', 'Dry Cakes', 'Muffins', 'Specialties', 'Cream Cakes'];
+    categoryOrder.forEach(category => {
+      if (!categories[category]) return;
+      
+      const catClass = category.toLowerCase()
+        .replace(/&/g, '')
+        .replace(/\s+/g, '')
+        .match(/^(cookies)|(cakes)|(muffins)|(specialties)|(cream)/);
+      let classKey = catClass ? catClass[0] : '';
+      if (classKey === 'cakes') classKey = 'cakes';
+      if (category === 'Cream Cakes') classKey = 'cream';
+      
+      const group = document.createElement('div');
+      group.className = `category-group ${classKey}`;
+      
+      const label = document.createElement('div');
+      label.className = 'category-label';
+      label.textContent = category;
+      group.appendChild(label);
+      
+      categories[category].forEach(({ idx, item }) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'dropdown-item';
+        itemDiv.dataset.index = idx;
+        itemDiv.textContent = `${item.name} (${item.unit}) — ₹${item.price}`;
+        itemDiv.onclick = () => selectDropdownItem(idx, item);
+        group.appendChild(itemDiv);
+      });
+      
+      dropdownList.appendChild(group);
+    });
+    
+    // Add "Other" option
+    const otherDiv = document.createElement('div');
+    otherDiv.className = 'dropdown-item-other';
+    otherDiv.dataset.index = 'other';
+    otherDiv.textContent = '✏️ Other / Custom item…';
+    otherDiv.onclick = () => selectDropdownItem('other', null);
+    dropdownList.appendChild(otherDiv);
+    
+    // Setup dropdown toggle
+    document.getElementById('dropdownHeader').addEventListener('click', toggleDropdown);
+    document.addEventListener('click', closeDropdownOnClickOutside);
+  }
+  
+  function toggleDropdown() {
+    const header = document.getElementById('dropdownHeader');
+    const list = document.getElementById('dropdownList');
+    header.classList.toggle('active');
+    list.classList.toggle('active');
+  }
+  
+  function closeDropdownOnClickOutside(e) {
+    const dropdown = document.getElementById('itemNameDropdown');
+    const header = document.getElementById('dropdownHeader');
+    const list = document.getElementById('dropdownList');
+    
+    if (!dropdown.contains(e.target)) {
+      header.classList.remove('active');
+      list.classList.remove('active');
+    }
+  }
+  
+  function selectDropdownItem(idx, item) {
+    document.getElementById('itemName').value = idx;
+    document.getElementById('dropdownHeader').classList.remove('active');
+    document.getElementById('dropdownList').classList.remove('active');
+    
+    // Update display text
+    const text = idx === 'other' ? '✏️ Other / Custom item…' : `${item.name} (${item.unit}) — ₹${item.price}`;
+    document.getElementById('dropdownText').textContent = text;
+    
+    // Update selected styling
+    document.querySelectorAll('.dropdown-item, .dropdown-item-other').forEach(el => {
+      el.classList.remove('selected');
+    });
+    document.querySelector(`[data-index="${idx}"]`).classList.add('selected');
+    
+    onItemSelect();
+  }
+
+  function searchItems() {
+    const searchQuery = document.getElementById('itemSearch').value.toLowerCase().trim();
+    const groups = document.querySelectorAll('.category-group');
+    
+    groups.forEach(group => {
+      let visibleCount = 0;
+      const items = group.querySelectorAll('.dropdown-item');
+      
+      items.forEach(item => {
+        const catalogueIndex = item.dataset.index;
+        const catalogueItem = CATALOGUE[catalogueIndex];
+        const itemText = `${catalogueItem.name} ${catalogueItem.unit} ₹${catalogueItem.price} ${catalogueItem.category}`.toLowerCase();
+        
+        if (searchQuery === '' || itemText.includes(searchQuery)) {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      // Show/hide category group based on visible items
+      group.style.display = visibleCount > 0 ? '' : 'none';
+    });
+  }
+
+  function onItemSelect() {
+    const idx = document.getElementById('itemName').value;
+    const customRow = document.getElementById('customItemRow');
+    const priceEl   = document.getElementById('itemPrice');
+    if (idx === '') {
+      priceEl.value = '';
+      customRow.style.display = 'none';
+      return;
+    }
+    if (idx === 'other') {
+      priceEl.value = '';
+      customRow.style.display = 'flex';
+      document.getElementById('customItemName').focus();
+      return;
+    }
+    customRow.style.display = 'none';
+    priceEl.value = CATALOGUE[idx].price;
+    document.getElementById('itemQty').value = '1';
+    document.getElementById('itemQty').focus();
+  }
+
+  // Generate invoice number from timestamp
+  function generateInvoiceNumber() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `INV-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  }
+
+  document.getElementById('invoiceNumber').textContent = generateInvoiceNumber();
+  document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+
+  // Set today's date below the stamp
+  (function setStampDate() {
+    const now = new Date();
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    document.getElementById('stampDate').textContent = now.toLocaleDateString('en-IN', options);
+  })();
+
+  function showAddPanel() {
+    if (items.length >= MAX_ITEMS) return;
+    document.getElementById('addItemPanel').classList.add('open');
+    document.getElementById('addItemBtnRow').style.display = 'none';
+    document.getElementById('dropdownHeader').focus();
+  }
+
+  function cancelAdd() {
+    clearPanel();
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+  }
+
+  function clearPanel() {
+    document.getElementById('itemName').value = '';
+    document.getElementById('dropdownText').textContent = '— Select item —';
+    document.getElementById('dropdownHeader').classList.remove('active');
+    document.getElementById('dropdownList').classList.remove('active');
+    document.querySelectorAll('.dropdown-item, .dropdown-item-other').forEach(el => {
+      el.classList.remove('selected');
+    });
+    // Reset search input if it exists
+    const searchInput = document.getElementById('itemSearch');
+    if (searchInput) searchInput.value = '';
+    document.getElementById('itemQty').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('customItemName').value = '';
+    document.getElementById('customItemUnit').value = '';
+    document.getElementById('customItemRow').style.display = 'none';
+    searchItems(); // Reset search
+  }
+
+
+  function addItem() {
+    const idx   = document.getElementById('itemName').value;
+    const qty   = parseFloat(document.getElementById('itemQty').value);
+    const price = parseFloat(document.getElementById('itemPrice').value);
+
+    if (idx === '')         { alert('Please select an item.'); return; }
+    if (!qty || qty <= 0)   { alert('Please enter a valid quantity.'); return; }
+    if (isNaN(price) || price < 0) { alert('Please enter a valid price.'); return; }
+
+    let name, unit;
+    if (idx === 'other') {
+      name = document.getElementById('customItemName').value.trim();
+      if (!name) { alert('Please enter the item description.'); return; }
+      unit = document.getElementById('customItemUnit').value.trim();
+    } else {
+      const product = CATALOGUE[idx];
+      name = product.name;
+      unit = product.unit;
+    }
+    // Merge with existing row if same item+price exists
+    const existing = items.find(it => it.name === name && it.price === price);
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      items.push({ name, unit, qty, price });
+    }
+    renderItems();
+    clearPanel();
+
+    if (items.length >= MAX_ITEMS) {
+      document.getElementById('addItemPanel').classList.remove('open');
+      document.getElementById('addItemBtnRow').style.display = 'flex';
+      document.getElementById('addItemBtn').disabled = true;
+    } else {
+      cancelAdd();
+      // Keep panel workflow: go back to button
+    }
+  }
+
+  function removeItem(index) {
+    items.splice(index, 1);
+    renderItems();
+    document.getElementById('addItemBtn').disabled = false;
+  }
+
+  function renderItems() {
+    const tbody = document.getElementById('itemsBody');
+    tbody.innerHTML = '';
+
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr id="emptyRow"><td colspan="7" class="empty-state">No items added yet.</td></tr>';
+      document.getElementById('totalPrice').textContent = '₹0.00';
+      document.getElementById('grandTotal').textContent = '₹0.00';
+      document.getElementById('advanceDiscount').value = '0';
+      document.getElementById('itemCountNote').textContent = '0 / 20 items';
+      document.getElementById('qrSection').classList.add('hidden');
+      return;
+    }
+
+    let grand = 0;
+    items.forEach((item, i) => {
+      const lineTotal = item.qty * item.price;
+      grand += lineTotal;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i + 1}</td>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.unit)}</td>
+        <td class="col-qty">${item.qty}</td>
+        <td class="col-price">₹${item.price.toFixed(2)}</td>
+        <td class="col-total">₹${lineTotal.toFixed(2)}</td>
+        <td class="col-action no-print">
+          <button class="btn btn-danger" onclick="removeItem(${i})" title="Remove">✕</button>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Update total price
+    document.getElementById('totalPrice').textContent = `₹${grand.toFixed(2)}`;
+    
+    // Calculate grand total with advance/discount
+    updateGrandTotal();
+    
+    document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
+    
+    // Show QR section only if grand total > 0
+    const qrSection = document.getElementById('qrSection');
+    if (grand > 0) {
+      qrSection.classList.remove('hidden');
+      generatePaymentQR();
+    } else {
+      qrSection.classList.add('hidden');
+    }
+  }
+
+  function updateGrandTotal() {
+    const totalPriceText = document.getElementById('totalPrice').textContent;
+    const totalPrice = parseFloat(totalPriceText.replace('₹', '').trim());
+    const advanceDiscount = parseFloat(document.getElementById('advanceDiscount').value) || 0;
+    
+    const finalGrandTotal = Math.max(0, totalPrice - advanceDiscount);
+    document.getElementById('grandTotal').textContent = `₹${finalGrandTotal.toFixed(2)}`;
+    
+    // Update QR code if total > 0
+    if (finalGrandTotal > 0) {
+      generatePaymentQR();
+    }
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Allow pressing Enter in qty/price fields to trigger add
+  ['itemQty','itemPrice'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') addItem();
+    });
+  });
+
+  function printInvoice() {
+    // Close add panel if open before printing
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+    if (isCordovaReady && window.cordova.plugins && window.cordova.plugins.printer) {
+      // Native Android print dialog (includes "Save as PDF" as a printer option)
+      window.cordova.plugins.printer.print(null, { name: document.getElementById('invoiceNumber').textContent }, function () {});
+    } else {
+      window.print();
+    }
+  }
+
+  // Renders the invoice to a PNG and hands the file back via callback(nativeUrlOrNull, canvas)
+  function renderInvoiceToFile(fileName, callback) {
+    document.getElementById('addItemPanel').classList.remove('open');
+    document.getElementById('addItemBtnRow').style.display = 'flex';
+    document.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'hidden');
+
+    html2canvas(document.querySelector('.container'), {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff'
+    }).then(canvas => {
+      document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+
+      if (!isCordovaReady || !window.resolveLocalFileSystemURL) {
+        callback(null, canvas);
+        return;
+      }
+
+      canvas.toBlob(blob => {
+        window.resolveLocalFileSystemURL(cordova.file.cacheDirectory, dirEntry => {
+          dirEntry.getFile(fileName, { create: true, exclusive: false }, fileEntry => {
+            fileEntry.createWriter(writer => {
+              writer.onwriteend = () => callback(fileEntry.nativeURL || fileEntry.toURL(), canvas);
+              writer.onerror = () => callback(null, canvas);
+              writer.write(blob);
+            }, () => callback(null, canvas));
+          }, () => callback(null, canvas));
+        }, () => callback(null, canvas));
+      }, 'image/png');
+    }).catch(() => {
+      document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+      alert('Failed to capture invoice. Please try again.');
+    });
+  }
+
+  function captureSnapshot() {
+    const invoiceNumber = document.getElementById('invoiceNumber').textContent;
+    renderInvoiceToFile(`${invoiceNumber}.png`, (nativeUrl, canvas) => {
+      if (nativeUrl) {
+        if (window.cordova.plugins.fileOpener2) {
+          window.cordova.plugins.fileOpener2.open(nativeUrl, 'image/png', {
+            error: () => alert('Invoice image saved, but no app is available to open it.'),
+            success: () => {}
+          });
+        }
+        // Also offer the native share sheet so the user can save it to Gallery/Files/Drive
+        if (window.plugins && window.plugins.socialsharing) {
+          window.plugins.socialsharing.share(null, null, nativeUrl, null);
+        }
+      } else {
+        // Plain browser fallback
+        const link = document.createElement('a');
+        link.download = `${invoiceNumber}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+    });
+  }
+
+  function shareOnWhatsApp() {
+    const invoiceNumber = document.getElementById('invoiceNumber').textContent;
+    const message = `📋 *Invoice ${invoiceNumber}* from Beyond Blissful Bakes`;
+
+    renderInvoiceToFile(`${invoiceNumber}.png`, (nativeUrl, canvas) => {
+      if (nativeUrl && window.plugins && window.plugins.socialsharing) {
+        window.plugins.socialsharing.shareViaWhatsApp(message, nativeUrl, null,
+          () => {},
+          () => {
+            // WhatsApp not installed or share failed - offer the general share sheet instead
+            window.plugins.socialsharing.share(message, null, nativeUrl, null);
+          }
+        );
+        return;
+      }
+
+      // Plain browser fallback
+      canvas.toBlob(blob => {
+        const file = new File([blob], `${invoiceNumber}.png`, { type: 'image/png' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ title: 'BBB Invoice', text: message, files: [file] }).catch(err => {
+            if (err.name !== 'AbortError') console.error('Share failed:', err);
+          });
+        } else {
+          const whatsappUrl = `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, '_blank');
+          setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = `${invoiceNumber}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('WhatsApp has opened. Please attach the downloaded invoice image to your message.');
+          }, 500);
+        }
+      }, 'image/png');
+    });
+  }
+
+
+  const UPI_ID = '8826548216@mbkns'; // ⚠️ Replace with your actual UPI ID
+  const BUSINESS_NAME = 'Beyond Blissful Bakes';
+
+  function generatePaymentQR() {
+    const grandTotalText = document.getElementById('grandTotal').textContent;
+    const amount = parseFloat(grandTotalText.replace('₹', '').trim());
+    
+    if (amount <= 0) return;
+    
+    const upiString = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(BUSINESS_NAME)}&am=${amount.toFixed(2)}&tn=BBB%20Invoice`;
+    
+    const container = document.getElementById('qrcodeContainer');
+    container.innerHTML = '';
+    new QRCode(container, {
+      text: upiString,
+      width: 100,
+      height: 100,
+      colorDark: '#000',
+      colorLight: '#fff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  // Initialize - QR code will show only when total > 0
+  // generatePaymentQR() is called from renderItems() when needed
+
+</script>
+</body>
+</html>

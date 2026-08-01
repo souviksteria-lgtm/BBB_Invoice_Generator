@@ -3,28 +3,94 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-    <title>BBB Invoice Generator - Mobile</title>
+    <title>Beyond Blissful Bakes</title>
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
       body { 
-        margin: 0; 
-        padding: 0; 
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        background: #f0f4f8;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      .container {
+        max-width: 500px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 40px 20px;
+      }
+      .header {
+        margin-bottom: 30px;
+      }
+      .brand-name {
+        font-size: 2rem;
+        font-weight: 900;
+        color: #7b1a1a;
+        margin-bottom: 5px;
+        letter-spacing: 0.5px;
+      }
+      .tagline {
+        font-size: 0.95rem;
+        color: #b03030;
+        font-style: italic;
+        margin-bottom: 20px;
+      }
+      .btn-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      .btn {
+        display: block;
+        padding: 16px 20px;
+        background: #3182ce;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        touch-action: manipulation;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn:hover {
+        background: #2b6cb0;
+      }
+      .btn.secondary {
+        background: #2d6a4f;
+      }
+      .btn.secondary:hover {
+        background: #1f4d37;
+      }
+      .version {
+        margin-top: 30px;
+        font-size: 0.85rem;
+        color: #718096;
       }
     </style>
   </head>
   <body>
-    <div id="app">
-      <h1>BBB Invoice Generator - Mobile App</h1>
-      <p>This is a placeholder for the mobile app version.</p>
-      <p>Copy the HTML files from the parent directory to this location.</p>
+    <div class="container">
+      <div class="header">
+        <div class="brand-name">Beyond Blissful Bakes</div>
+        <div class="tagline">by Baisakhi — your happiness our priority</div>
+      </div>
       
-      <h2>Files to copy:</h2>
-      <ul>
-        <li>index.html (rename to invoice.html)</li>
-        <li>myorder.html</li>
-        <li>catalogue.json</li>
-        <li>signature.png</li>
-      </ul>
+      <div class="btn-container">
+        <a href="invoice.html" class="btn">📋 Generate Invoice</a>
+        <a href="myorder.html" class="btn secondary">🛒 Generate Order</a>
+      </div>
+      
+      <div class="version">
+        Mobile App v1.0.0
+      </div>
     </div>
 
     <!-- Cordova is pre-loaded with every app -->

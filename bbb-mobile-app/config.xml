@@ -1,38 +1,41 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.beyondblissfulbakes.invoicegenerator" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.beyondblissfulbakes.invoicegenerator" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>BBB Invoice Generator</name>
     <description>Beyond Blissful Bakes - Invoice and Order Generator</description>
     <author email="baisakhi@beyondblissfulbakes.com" href="https://www.beyondblissfulbakes.com">
         Beyond Blissful Bakes
     </author>
-    
-    <!-- Android preference settings -->
     <preference name="Orientation" value="portrait" />
     <preference name="Fullscreen" value="false" />
     <preference name="ShowTitle" value="true" />
     <preference name="android-minSdkVersion" value="24" />
     <preference name="android-targetSdkVersion" value="33" />
-    
-    <!-- iOS preferences -->
     <preference name="deployment-target" value="13.0" />
-    
-    <!-- Entry point -->
     <content src="index.html" />
-    
-    <!-- Permission for Android -->
     <permission name="android.permission.INTERNET" />
     <permission name="android.permission.READ_EXTERNAL_STORAGE" />
     <permission name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    
-    <!-- Allow access to local resources -->
     <access origin="*" />
-    
-    <!-- Plugins -->
     <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <plugin name="cordova-plugin-file" spec="^8.0.0" />
-    <plugin name="cordova-plugin-file-transfer" spec="^1.7.1" />
-    
-    <!-- Icon and Splash Screen -->
-    <icon src="res/icon.png" />
-    <splash src="res/splash.png" />
+    <plugin name="cordova-plugin-x-socialsharing" spec="^6.0.4" />
+    <plugin name="cordova-plugin-printer" spec="^0.8.0" />
+    <plugin name="cordova-plugin-file-opener2" spec="^4.0.0" />
+
+    <icon src="res/icon/logo-source.png" />
+    <platform name="android">
+        <icon density="ldpi" src="res/icon/android/drawable-ldpi-icon.png" />
+        <icon density="mdpi" src="res/icon/android/drawable-mdpi-icon.png" />
+        <icon density="hdpi" src="res/icon/android/drawable-hdpi-icon.png" />
+        <icon density="xhdpi" src="res/icon/android/drawable-xhdpi-icon.png" />
+        <icon density="xxhdpi" src="res/icon/android/drawable-xxhdpi-icon.png" />
+        <icon density="xxxhdpi" src="res/icon/android/drawable-xxxhdpi-icon.png" />
+        <!-- Android 11+ package visibility: required so socialsharing plugin can detect WhatsApp -->
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <queries>
+                <package android:name="com.whatsapp" />
+                <package android:name="com.whatsapp.w4b" />
+            </queries>
+        </config-file>
+    </platform>
 </widget>
