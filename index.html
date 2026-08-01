@@ -176,6 +176,16 @@
       appearance: none;
     }
     .item-fields select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23718096' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer; }
+    .item-fields select optgroup {
+      font-weight: 700;
+      color: #1a365d;
+      background: #edf2f7;
+    }
+    .item-fields select optgroup option {
+      font-weight: 400;
+      color: #2d3748;
+      background: #f7fafc;
+    }
     .item-fields select:focus,
     .item-fields input[type="number"]:focus {
       outline: none;
@@ -601,12 +611,32 @@
   function buildDropdown() {
     const sel = document.getElementById('itemName');
     sel.innerHTML = '<option value="">— Select item —</option>';
-    CATALOGUE.forEach((p, i) => {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = `${p.name} (${p.unit}) — ₹${p.price}`;
-      sel.appendChild(opt);
+    
+    // Group items by category
+    const categories = {};
+    CATALOGUE.forEach((item, idx) => {
+      if (!categories[item.category]) {
+        categories[item.category] = [];
+      }
+      categories[item.category].push({ idx, item });
     });
+    
+    // Add optgroups for each category
+    Object.keys(categories).sort().forEach(category => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = category;
+      
+      categories[category].forEach(({ idx, item }) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${item.name} (${item.unit}) — ₹${item.price}`;
+        optgroup.appendChild(opt);
+      });
+      
+      sel.appendChild(optgroup);
+    });
+    
+    // Add "Other" option at the end
     const other = document.createElement('option');
     other.value = 'other';
     other.textContent = '✏️ Other / Custom item…';
@@ -616,25 +646,27 @@
   function searchItems() {
     const searchQuery = document.getElementById('itemSearch').value.toLowerCase().trim();
     const select = document.getElementById('itemName');
-    const options = select.querySelectorAll('option');
+    const optgroups = select.querySelectorAll('optgroup');
     
-    options.forEach((option, index) => {
-      // Keep the "Select item" and "Other" options always visible
-      if (option.value === '' || option.value === 'other') {
-        option.style.display = '';
-        return;
-      }
+    optgroups.forEach(optgroup => {
+      let visibleCount = 0;
+      const options = optgroup.querySelectorAll('option');
       
-      const catalogueIndex = option.value;
-      const item = CATALOGUE[catalogueIndex];
-      const itemText = `${item.name} ${item.unit} ₹${item.price}`.toLowerCase();
+      options.forEach(option => {
+        const catalogueIndex = option.value;
+        const item = CATALOGUE[catalogueIndex];
+        const itemText = `${item.name} ${item.unit} ₹${item.price} ${item.category}`.toLowerCase();
+        
+        if (searchQuery === '' || itemText.includes(searchQuery)) {
+          option.style.display = '';
+          visibleCount++;
+        } else {
+          option.style.display = 'none';
+        }
+      });
       
-      // Show option if it matches search query
-      if (searchQuery === '' || itemText.includes(searchQuery)) {
-        option.style.display = '';
-      } else {
-        option.style.display = 'none';
-      }
+      // Show/hide optgroup based on visible items
+      optgroup.style.display = visibleCount > 0 ? '' : 'none';
     });
   }
 
