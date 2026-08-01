@@ -656,34 +656,22 @@
       
       canvas.toBlob(blob => {
         const orderNumber = document.getElementById('orderNumber').textContent;
-        const file = new File([blob], `${orderNumber}.png`, { type: 'image/png' });
         
-        // Try to use Web Share API with file attachment (works on most mobile browsers and some desktop)
-        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({
-            title: 'BBB Order',
-            text: `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`,
-            files: [file]
-          }).catch(err => {
-            if (err.name !== 'AbortError') {
-              console.error('Share failed:', err);
-            }
-          });
-        } else {
-          // Fallback: Open WhatsApp Web with message and download image
-          const phoneNumber = '918826548216'; // +91 country code for India
-          const message = encodeURIComponent(`📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`);
-          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+        // Auto-download the screenshot image first
+        const link = document.createElement('a');
+        link.download = `${orderNumber}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        // Open WhatsApp directly with the message (without share picker)
+        const phoneNumber = '918826548216'; // +91 country code for India
+        const message = encodeURIComponent(`📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`);
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+        
+        // Small delay to ensure image download starts first
+        setTimeout(() => {
           window.open(whatsappUrl, '_blank');
-          
-          // Auto-download the image for manual attachment
-          setTimeout(() => {
-            const link = document.createElement('a');
-            link.download = `${orderNumber}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-          }, 500);
-        }
+        }, 300);
       }, 'image/png');
     }).catch(() => {
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
