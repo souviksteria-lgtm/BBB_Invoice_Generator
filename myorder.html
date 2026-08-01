@@ -183,6 +183,31 @@
       background-color: #fff;
     }
 
+    .item-search-wrapper {
+      position: relative;
+      width: 100%;
+    }
+    #itemSearch {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      background: #f7fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+      background-size: 16px;
+      transition: border-color 0.2s;
+      margin-bottom: 8px;
+    }
+    #itemSearch:focus {
+      outline: none;
+      border-color: #3182ce;
+      background-color: #fff;
+    }
+    #itemSearch::placeholder {
+      color: #a0aec0;
+    }
+
     /* ── Buttons ── */
     .btn {
       display: inline-flex;
@@ -411,6 +436,11 @@
 
     <!-- Add Item Panel -->
     <div class="add-item-panel" id="addItemPanel">
+      <!-- Search Input -->
+      <div class="item-search-wrapper">
+        <input type="text" id="itemSearch" placeholder="🔍 Search items..." onkeyup="searchItems()" />
+      </div>
+
       <div class="item-fields">
         <select id="itemName" onchange="onItemSelect()">
           <option value="">— Select item —</option>
@@ -521,6 +551,31 @@
     sel.appendChild(other);
   }
 
+  function searchItems() {
+    const searchQuery = document.getElementById('itemSearch').value.toLowerCase().trim();
+    const select = document.getElementById('itemName');
+    const options = select.querySelectorAll('option');
+    
+    options.forEach((option, index) => {
+      // Keep the "Select item" and "Other" options always visible
+      if (option.value === '' || option.value === 'other') {
+        option.style.display = '';
+        return;
+      }
+      
+      const catalogueIndex = option.value;
+      const item = CATALOGUE[catalogueIndex];
+      const itemText = `${item.name} ${item.unit} ₹${item.price}`.toLowerCase();
+      
+      // Show option if it matches search query
+      if (searchQuery === '' || itemText.includes(searchQuery)) {
+        option.style.display = '';
+      } else {
+        option.style.display = 'none';
+      }
+    });
+  }
+
   function onItemSelect() {
     const idx = document.getElementById('itemName').value;
     const customRow = document.getElementById('customItemRow');
@@ -556,6 +611,8 @@
     if (items.length >= MAX_ITEMS) return;
     document.getElementById('addItemPanel').classList.add('open');
     document.getElementById('addItemBtnRow').style.display = 'none';
+    document.getElementById('itemSearch').value = '';
+    searchItems(); // Reset search
     document.getElementById('itemName').focus();
   }
 
@@ -571,7 +628,9 @@
     document.getElementById('itemPrice').value = '';
     document.getElementById('customItemName').value = '';
     document.getElementById('customItemUnit').value = '';
+    document.getElementById('itemSearch').value = '';
     document.getElementById('customItemRow').style.display = 'none';
+    searchItems(); // Reset search
   }
 
   function addItem() {
