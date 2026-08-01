@@ -365,7 +365,8 @@
       </div>
       <!-- shown only when Other is selected -->
       <div id="customItemRow" style="display:none; margin-bottom:10px;">
-        <input type="text" id="customItemName" placeholder="Enter item description" style="width:100%;" />
+        <input type="text" id="customItemName" placeholder="Enter item description" style="width:100%; margin-bottom:8px;" />
+        <input type="text" id="customItemUnit" placeholder="Enter unit (e.g., 250g, 4 pcs., 500ml)" style="width:100%;" />
       </div>
       <div class="action-row">
         <button class="btn btn-success" onclick="addItem()">+ Add</button>
@@ -524,6 +525,7 @@
     document.getElementById('itemQty').value = '';
     document.getElementById('itemPrice').value = '';
     document.getElementById('customItemName').value = '';
+    document.getElementById('customItemUnit').value = '';
     document.getElementById('customItemRow').style.display = 'none';
   }
 
@@ -540,7 +542,7 @@
     if (idx === 'other') {
       name = document.getElementById('customItemName').value.trim();
       if (!name) { alert('Please enter the item description.'); return; }
-      unit = '';
+      unit = document.getElementById('customItemUnit').value.trim();
     } else {
       const product = CATALOGUE[idx];
       name = product.name;
