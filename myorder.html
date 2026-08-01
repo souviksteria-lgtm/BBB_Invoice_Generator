@@ -208,6 +208,34 @@
       color: #a0aec0;
     }
 
+    .dropdown-search {
+      padding: 10px 10px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f7fafc;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .dropdown-search input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: #2d3748;
+      background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;
+      background-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .dropdown-search input:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.1);
+    }
+    .dropdown-search input::placeholder {
+      color: #a0aec0;
+    }
+
     .custom-dropdown {
       position: relative;
       display: block;
@@ -556,11 +584,6 @@
 
     <!-- Add Item Panel -->
     <div class="add-item-panel" id="addItemPanel">
-      <!-- Search Input -->
-      <div class="item-search-wrapper">
-        <input type="text" id="itemSearch" placeholder="🔍 Search items..." onkeyup="searchItems()" />
-      </div>
-
       <div class="item-fields">
         <div class="custom-dropdown" id="itemNameDropdown">
           <div class="dropdown-header" id="dropdownHeader">
@@ -664,6 +687,17 @@
   function buildDropdown() {
     const dropdownList = document.getElementById('dropdownList');
     dropdownList.innerHTML = '';
+    
+    // Add search box at top
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'dropdown-search';
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.id = 'itemSearch';
+    searchInput.placeholder = '🔍 Search items...';
+    searchInput.onkeyup = () => searchItems();
+    searchContainer.appendChild(searchInput);
+    dropdownList.appendChild(searchContainer);
     
     // Group items by category
     const categories = {};
@@ -817,8 +851,6 @@
     if (items.length >= MAX_ITEMS) return;
     document.getElementById('addItemPanel').classList.add('open');
     document.getElementById('addItemBtnRow').style.display = 'none';
-    document.getElementById('itemSearch').value = '';
-    searchItems(); // Reset search
     document.getElementById('dropdownHeader').focus();
   }
 
@@ -836,11 +868,13 @@
     document.querySelectorAll('.dropdown-item, .dropdown-item-other').forEach(el => {
       el.classList.remove('selected');
     });
+    // Reset search input if it exists
+    const searchInput = document.getElementById('itemSearch');
+    if (searchInput) searchInput.value = '';
     document.getElementById('itemQty').value = '';
     document.getElementById('itemPrice').value = '';
     document.getElementById('customItemName').value = '';
     document.getElementById('customItemUnit').value = '';
-    document.getElementById('itemSearch').value = '';
     document.getElementById('customItemRow').style.display = 'none';
     searchItems(); // Reset search
   }
