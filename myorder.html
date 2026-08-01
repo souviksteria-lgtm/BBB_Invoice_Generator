@@ -656,43 +656,50 @@
       
       canvas.toBlob(blob => {
         const orderNumber = document.getElementById('orderNumber').textContent;
+        const orderMessage = `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`;
+        
+        // Create File object from blob
         const file = new File([blob], `${orderNumber}.png`, { type: 'image/png' });
         
-        // Detect if on mobile with WhatsApp (will auto-attach file)
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          // Mobile with Web Share API - file will be auto-attached when selecting WhatsApp
+        // Check if device supports Web Share API with files
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          // Use Web Share API - this will let user select WhatsApp and file auto-attaches
           navigator.share({
             title: 'BBB Order',
-            text: `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`,
+            text: orderMessage,
             files: [file]
           }).catch(err => {
             if (err.name !== 'AbortError') {
               console.error('Share failed:', err);
+              fallbackDownload(canvas, orderNumber);
             }
           });
         } else {
-          // Desktop or no Share API - download file and open WhatsApp
-          const link = document.createElement('a');
-          link.download = `${orderNumber}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          
-          // Open WhatsApp with message
-          const phoneNumber = '918826548216';
-          const message = encodeURIComponent(`📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`);
-          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-          
-          setTimeout(() => {
-            window.open(whatsappUrl, '_blank');
-          }, 500);
+          // Fallback: Download file for manual attachment
+          fallbackDownload(canvas, orderNumber);
         }
       }, 'image/png');
     }).catch(() => {
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
       alert('Failed to capture order. Please try again.');
     });
+  }
+
+  function fallbackDownload(canvas, orderNumber) {
+    // Download the screenshot
+    const link = document.createElement('a');
+    link.download = `${orderNumber}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    // Open WhatsApp Web
+    setTimeout(() => {
+      const phoneNumber = '918826548216';
+      const orderMessage = `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`;
+      const message = encodeURIComponent(orderMessage);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+      window.open(whatsappUrl, '_blank');
+    }, 500);
   }
 
   // Initialize - order number will be generated on page load
