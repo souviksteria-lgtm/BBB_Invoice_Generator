@@ -658,20 +658,32 @@
         const orderNumber = document.getElementById('orderNumber').textContent;
         const file = new File([blob], `${orderNumber}.png`, { type: 'image/png' });
         
-        // Open WhatsApp targeting the phone number 8826548216 with country code for India
-        const phoneNumber = '918826548216'; // +91 country code for India
-        const message = encodeURIComponent(`📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`);
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-        window.open(whatsappUrl, '_blank');
-        
-        // Also download the image for manual attachment
-        setTimeout(() => {
-          const link = document.createElement('a');
-          link.download = `${orderNumber}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          alert('WhatsApp has opened with the number 8826548216. Please attach the downloaded order image to your message.');
-        }, 500);
+        // Try to use Web Share API with file attachment (works on most mobile browsers and some desktop)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            title: 'BBB Order',
+            text: `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`,
+            files: [file]
+          }).catch(err => {
+            if (err.name !== 'AbortError') {
+              console.error('Share failed:', err);
+            }
+          });
+        } else {
+          // Fallback: Open WhatsApp Web with message and download image
+          const phoneNumber = '918826548216'; // +91 country code for India
+          const message = encodeURIComponent(`📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`);
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+          window.open(whatsappUrl, '_blank');
+          
+          // Auto-download the image for manual attachment
+          setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = `${orderNumber}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          }, 500);
+        }
       }, 'image/png');
     }).catch(() => {
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
