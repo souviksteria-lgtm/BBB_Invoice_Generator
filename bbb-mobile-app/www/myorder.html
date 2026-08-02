@@ -549,21 +549,25 @@
       font-family: 'Segoe UI', Arial, sans-serif;
     }
     .chatbot-toggle {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      min-width: 64px;
+      height: 64px;
+      border-radius: 32px;
       background: #7b1a1a;
       color: #fff;
       border: none;
       box-shadow: 0 4px 14px rgba(0,0,0,0.25);
       cursor: pointer;
-      font-size: 1.6rem;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 1px;
+      padding: 6px 10px;
       transition: transform 0.15s;
     }
     .chatbot-toggle:hover { transform: scale(1.06); }
+    .chatbot-toggle-icon { font-size: 1.5rem; line-height: 1; }
+    .chatbot-toggle-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.4px; line-height: 1; }
     .chatbot-panel {
       display: none;
       flex-direction: column;
@@ -823,10 +827,13 @@
 
 <!-- Gunnu Chatbot Widget -->
 <div class="chatbot-widget no-print">
-  <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Chat with Gunnu">💬</button>
+  <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Chat with Gunnu">
+    <span class="chatbot-toggle-icon">👨‍🍳</span>
+    <span class="chatbot-toggle-label">Gunnu</span>
+  </button>
   <div class="chatbot-panel" id="chatbotPanel">
     <div class="chatbot-header">
-      <div class="chatbot-avatar">🧁</div>
+      <div class="chatbot-avatar">👨‍🍳</div>
       <div>
         <div class="chatbot-name">Gunnu</div>
         <div class="chatbot-status">BBB Assistant • Online</div>
