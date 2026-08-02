@@ -945,14 +945,6 @@
       dropdownList.appendChild(group);
     });
     
-    // Add "Other" option
-    const otherDiv = document.createElement('div');
-    otherDiv.className = 'dropdown-item-other';
-    otherDiv.dataset.index = 'other';
-    otherDiv.textContent = '✏️ Other / Custom item…';
-    otherDiv.onclick = () => selectDropdownItem('other', null);
-    dropdownList.appendChild(otherDiv);
-    
     // Setup dropdown toggle
     document.getElementById('dropdownHeader').addEventListener('click', toggleDropdown);
     document.addEventListener('click', closeDropdownOnClickOutside);
