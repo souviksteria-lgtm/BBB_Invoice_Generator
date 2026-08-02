@@ -539,6 +539,164 @@
       }
       .items-table tbody tr:hover { background: none; }
     }
+
+    /* ── Gunnu Chatbot Widget ── */
+    .chatbot-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2000;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .chatbot-toggle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #7b1a1a;
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      cursor: pointer;
+      font-size: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s;
+    }
+    .chatbot-toggle:hover { transform: scale(1.06); }
+    .chatbot-panel {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      bottom: 88px;
+      right: 20px;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      height: 440px;
+      max-height: calc(100vh - 120px);
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .chatbot-panel.open { display: flex; }
+    .chatbot-header {
+      background: #7b1a1a;
+      color: #fff;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chatbot-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .chatbot-name { font-weight: 700; font-size: 0.92rem; }
+    .chatbot-status { font-size: 0.7rem; opacity: 0.85; }
+    .chatbot-close {
+      margin-left: auto;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+    .chatbot-close:hover { opacity: 1; }
+    .chatbot-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      background: #f7fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chat-msg {
+      max-width: 82%;
+      padding: 8px 11px;
+      border-radius: 12px;
+      font-size: 0.83rem;
+      line-height: 1.35;
+      white-space: pre-line;
+    }
+    .chat-msg.bot {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      color: #2d3748;
+      align-self: flex-start;
+      border-bottom-left-radius: 3px;
+    }
+    .chat-msg.user {
+      background: #7b1a1a;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 3px;
+    }
+    .chatbot-quick-replies {
+      display: flex;
+      gap: 6px;
+      padding: 6px 10px;
+      overflow-x: auto;
+      background: #fff;
+      border-top: 1px solid #e2e8f0;
+    }
+    .chatbot-quick-replies button {
+      flex-shrink: 0;
+      background: #fdf5f5;
+      border: 1px solid #e6c8c8;
+      color: #7b1a1a;
+      border-radius: 14px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .chatbot-quick-replies button:hover { background: #fbe9e9; }
+    .chatbot-input-row {
+      display: flex;
+      gap: 6px;
+      padding: 8px 10px;
+      border-top: 1px solid #e2e8f0;
+      background: #fff;
+    }
+    .chatbot-input-row input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 20px;
+      font-size: 0.83rem;
+      background: #f7fafc;
+    }
+    .chatbot-input-row input:focus {
+      outline: none;
+      border-color: #7b1a1a;
+      background: #fff;
+    }
+    .chatbot-send {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #7b1a1a;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .chatbot-send:hover { background: #5e1414; }
+    @media (max-width: 420px) {
+      .chatbot-panel { width: calc(100vw - 24px); right: 12px; }
+      .chatbot-widget { right: 12px; bottom: 12px; }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="cordova.js"></script>
@@ -661,6 +819,32 @@
     &copy; <span id="copyrightYear"></span> Beyond Blissful Bakes &bull; By Baisakhi
   </div>
 
+</div>
+
+<!-- Gunnu Chatbot Widget -->
+<div class="chatbot-widget no-print">
+  <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Chat with Gunnu">💬</button>
+  <div class="chatbot-panel" id="chatbotPanel">
+    <div class="chatbot-header">
+      <div class="chatbot-avatar">🧁</div>
+      <div>
+        <div class="chatbot-name">Gunnu</div>
+        <div class="chatbot-status">BBB Assistant • Online</div>
+      </div>
+      <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages"></div>
+    <div class="chatbot-quick-replies">
+      <button type="button" onclick="sendQuickReply('Menu')">🍪 Menu</button>
+      <button type="button" onclick="sendQuickReply('Is it eggless?')">🥚 Eggless?</button>
+      <button type="button" onclick="sendQuickReply('Is it fresh?')">🍞 Freshness</button>
+      <button type="button" onclick="sendQuickReply('Hygiene')">✨ Hygiene</button>
+    </div>
+    <div class="chatbot-input-row">
+      <input type="text" id="chatbotInput" placeholder="Ask about a product, price, weight…" />
+      <button class="chatbot-send" onclick="sendChatMessage()" aria-label="Send">➤</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1109,6 +1293,104 @@
   }
 
   // Initialize - order number will be generated on page load
+
+  // ── Gunnu Chatbot ──
+  let chatbotGreeted = false;
+
+  function toggleChatbot() {
+    const panel = document.getElementById('chatbotPanel');
+    const isOpen = panel.classList.toggle('open');
+    if (isOpen) {
+      if (!chatbotGreeted) {
+        appendChatMessage('bot', "Hi, I'm Gunnu 🧁 — your Beyond Blissful Bakes assistant! Ask me about a product's name, weight or price, or tap a quick option below.");
+        chatbotGreeted = true;
+      }
+      document.getElementById('chatbotInput').focus();
+    }
+  }
+
+  function appendChatMessage(sender, text) {
+    const messages = document.getElementById('chatbotMessages');
+    const msg = document.createElement('div');
+    msg.className = `chat-msg ${sender}`;
+    msg.textContent = text;
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function sendQuickReply(text) {
+    document.getElementById('chatbotInput').value = text;
+    sendChatMessage();
+  }
+
+  function sendChatMessage() {
+    const input = document.getElementById('chatbotInput');
+    const text = input.value.trim();
+    if (!text) return;
+    appendChatMessage('user', text);
+    input.value = '';
+    setTimeout(() => {
+      appendChatMessage('bot', getGunnuResponse(text));
+    }, 300);
+  }
+
+  document.getElementById('chatbotInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChatMessage();
+  });
+
+  function getGunnuResponse(message) {
+    const text = message.toLowerCase().trim();
+
+    if (/^(hi|hello|hey|namaste|hola)\b/.test(text)) {
+      return "Hello! 👋 I'm Gunnu. Ask me about our products, prices or weights — or say 'menu' to see everything we bake!";
+    }
+    if (text.includes('who are you') || text.includes('your name')) {
+      return "I'm Gunnu 🧁, the friendly assistant for Beyond Blissful Bakes, here to help you with our menu, prices and more!";
+    }
+    if (text.includes('egg')) {
+      return "🥚❌ All our products are 100% eggless — safe and delicious for everyone!";
+    }
+    if (text.includes('fresh')) {
+      return "🍞 Everything is freshly baked in small batches with no preservatives — straight from our oven to you!";
+    }
+    if (text.includes('hygien') || text.includes('clean') || text.includes('healthy') || text.includes('quality')) {
+      return "✨ We follow strict hygiene standards and use quality ingredients, so every product is healthy and hygienically made. We're FSSAI certified (Lic. No. 22726694000028)!";
+    }
+    if (text.includes('menu') || text.includes('categories') || text.includes('what do you have') || text.includes('list')) {
+      const cats = [...new Set(CATALOGUE.map(i => i.category))];
+      return `We bake: ${cats.join(', ')}. 🍪🎂 Ask me about any specific product for its price and weight!`;
+    }
+    if (text.includes('thank')) {
+      return "You're welcome! Happy baking wishes from BBB! 😊";
+    }
+    if (text.includes('contact') || text.includes('order') || text.includes('deliver')) {
+      return "You can add items above and use 'Submit on WhatsApp' to place your order directly with us!";
+    }
+
+    // Search catalogue for matching products
+    if (CATALOGUE.length > 0) {
+      const words = text.split(/\s+/).filter(w => w.length > 2);
+      const matches = CATALOGUE.filter(item => {
+        const nameLower = item.name.toLowerCase();
+        if (text.length > 2 && nameLower.includes(text)) return true;
+        return words.some(w => nameLower.includes(w));
+      });
+
+      if (matches.length > 0) {
+        const seen = new Set();
+        const unique = matches.filter(m => {
+          const key = `${m.name}-${m.unit}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        const lines = unique.slice(0, 6).map(m => `• ${m.name} (${m.unit}) — ₹${m.price}`);
+        return `Here's what I found 🔎:\n${lines.join('\n')}`;
+      }
+    }
+
+    return "Sorry, I couldn't find that. 🤔 Try asking about a product name (e.g. \"Nankhatai price\"), or ask about 'menu', 'fresh', 'egg' or 'hygiene'.";
+  }
 
 </script>
 </body>
