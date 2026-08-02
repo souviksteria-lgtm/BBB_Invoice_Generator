@@ -809,7 +809,7 @@
   <hr class="divider" />
 
   <!-- Print & Snapshot Buttons -->
-  <div class="no-print" style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+  <div class="no-print" id="actionButtonsRow" style="display:none; gap:10px; margin-top:8px; flex-wrap:wrap;">
     <button class="btn btn-print" style="flex:1; min-width:140px;" onclick="printOrder()">🖨️ Print / Save as PDF</button>
     <button class="btn btn-print" style="flex:1; min-width:140px; background:#2d6a4f;" onclick="captureSnapshot()">📸 Save as Image</button>
     <button class="btn btn-print" style="flex:1; min-width:140px; background:#25d366;" onclick="submitOnWhatsApp()">💬 Submit on WhatsApp</button>
@@ -1123,6 +1123,7 @@
       document.getElementById('grandTotal').textContent = '₹0.00';
       document.getElementById('advanceDiscount').value = '0';
       document.getElementById('itemCountNote').textContent = '0 / 20 items';
+      toggleActionButtons(0);
       return;
     }
 
@@ -1160,6 +1161,11 @@
     
     const finalGrandTotal = Math.max(0, totalPrice - advanceDiscount);
     document.getElementById('grandTotal').textContent = `₹${finalGrandTotal.toFixed(2)}`;
+    toggleActionButtons(finalGrandTotal);
+  }
+
+  function toggleActionButtons(grandTotal) {
+    document.getElementById('actionButtonsRow').style.display = grandTotal > 0 ? 'flex' : 'none';
   }
 
   function escapeHtml(str) {
