@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BBB Order Generator</title>
+  <title>BBB Invoice Generator</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -45,20 +45,20 @@
       line-height: 1.1;
     }
     .brand-byline {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: #7b1a1a;
       font-family: Arial, 'Segoe UI', sans-serif;
       font-weight: 600;
       letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 2px;
+      margin-bottom: 0px;
     }
     .brand-tagline {
       font-family: 'Brush Script MT', 'Segoe Script', cursive;
-      font-size: 1.15rem;
+      font-size: 1rem;
       color: #b03030;
       font-style: italic;
-      margin: 4px 0 10px;
+      margin: 2px 0 6px;
     }
     .fssai-badge {
       display: inline-flex;
@@ -91,21 +91,21 @@
       display: none; /* replaced by brand-header */
     }
 
-    /* ── Order number ── */
-    .order-header {
+    /* ── Invoice number ── */
+    .invoice-header {
       background: #1a365d;
       color: #fff;
       border-radius: 6px;
-      padding: 7px 14px;
-      margin-bottom: 14px;
+      padding: 6px 10px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 3px;
     }
-    .order-header .label { font-size: 0.7rem; letter-spacing: 1px; opacity: 0.75; text-transform: uppercase; }
-    .order-header .value { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; }
+    .invoice-header .label { font-size: 0.7rem; letter-spacing: 1px; opacity: 0.75; text-transform: uppercase; }
+    .invoice-header .value { font-size: 0.88rem; font-weight: 700; letter-spacing: 0.5px; }
 
     /* ── Customer fields ── */
     .section-title {
@@ -510,6 +510,54 @@
       margin: 20px 0;
     }
 
+    /* ── Invoice Footer (QR + Stamp on same line) ── */
+    .invoice-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 8px;
+      min-height: 100px;
+    }
+    .invoice-footer-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .invoice-footer-left.hidden { visibility: hidden; }
+    .payment-qr-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1a365d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    #qrcodeContainer {
+      border: 2px solid #3182ce;
+      border-radius: 8px;
+      padding: 6px;
+      background: #fff;
+    }
+    #qrcodeContainer img, #qrcodeContainer canvas {
+      display: block;
+    }
+    .stamp-container {
+      width: 75px;
+      text-align: center;
+    }
+    .stamp-logo {
+      width: 75px;
+      height: 75px;
+      object-fit: contain;
+    }
+    .stamp-date {
+      font-size: 0.75rem;
+      color: #2d3748;
+      font-family: Arial, sans-serif;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
     .copyright-footer {
       text-align: center;
       margin-top: 16px;
@@ -525,6 +573,7 @@
       body { background: #fff; padding: 0; }
       .container { box-shadow: none; border-radius: 0; padding: 20px; max-width: 100%; }
       .no-print { display: none !important; }
+      .invoice-footer-left { display: none !important; }
       .add-item-panel { display: none !important; }
       .brand-header { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .brand-header * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -539,168 +588,9 @@
       }
       .items-table tbody tr:hover { background: none; }
     }
-
-    /* ── Gunnu Chatbot Widget ── */
-    .chatbot-widget {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 2000;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    .chatbot-toggle {
-      width: 64px;
-      height: 64px;
-      border-radius: 18px;
-      background: #fff;
-      border: 2px solid #7b1a1a;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px;
-      transition: transform 0.15s;
-    }
-    .chatbot-toggle:hover { transform: scale(1.06); }
-    .chatbot-toggle-icon { display: flex; width: 100%; height: 100%; }
-    .chatbot-toggle-icon img { width: 100%; height: 100%; object-fit: contain; }
-    .chatbot-panel {
-      display: none;
-      flex-direction: column;
-      position: fixed;
-      bottom: 88px;
-      right: 20px;
-      width: 320px;
-      max-width: calc(100vw - 32px);
-      height: 440px;
-      max-height: calc(100vh - 120px);
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
-      overflow: hidden;
-    }
-    .chatbot-panel.open { display: flex; }
-    .chatbot-header {
-      background: #7b1a1a;
-      color: #fff;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .chatbot-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    .chatbot-avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .chatbot-name { font-weight: 700; font-size: 0.92rem; }
-    .chatbot-status { font-size: 0.7rem; opacity: 0.85; }
-    .chatbot-close {
-      margin-left: auto;
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-      opacity: 0.85;
-    }
-    .chatbot-close:hover { opacity: 1; }
-    .chatbot-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      background: #f7fafc;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .chat-msg {
-      max-width: 82%;
-      padding: 8px 11px;
-      border-radius: 12px;
-      font-size: 0.83rem;
-      line-height: 1.35;
-      white-space: pre-line;
-    }
-    .chat-msg.bot {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      color: #2d3748;
-      align-self: flex-start;
-      border-bottom-left-radius: 3px;
-    }
-    .chat-msg.user {
-      background: #7b1a1a;
-      color: #fff;
-      align-self: flex-end;
-      border-bottom-right-radius: 3px;
-    }
-    .chatbot-quick-replies {
-      display: flex;
-      gap: 6px;
-      padding: 6px 10px;
-      overflow-x: auto;
-      background: #fff;
-      border-top: 1px solid #e2e8f0;
-    }
-    .chatbot-quick-replies button {
-      flex-shrink: 0;
-      background: #fdf5f5;
-      border: 1px solid #e6c8c8;
-      color: #7b1a1a;
-      border-radius: 14px;
-      padding: 5px 10px;
-      font-size: 0.72rem;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .chatbot-quick-replies button:hover { background: #fbe9e9; }
-    .chatbot-input-row {
-      display: flex;
-      gap: 6px;
-      padding: 8px 10px;
-      border-top: 1px solid #e2e8f0;
-      background: #fff;
-    }
-    .chatbot-input-row input {
-      flex: 1;
-      padding: 8px 10px;
-      border: 1.5px solid #cbd5e0;
-      border-radius: 20px;
-      font-size: 0.83rem;
-      background: #f7fafc;
-    }
-    .chatbot-input-row input:focus {
-      outline: none;
-      border-color: #7b1a1a;
-      background: #fff;
-    }
-    .chatbot-send {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #7b1a1a;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-    .chatbot-send:hover { background: #5e1414; }
-    @media (max-width: 420px) {
-      .chatbot-panel { width: calc(100vw - 24px); right: 12px; }
-      .chatbot-widget { right: 12px; bottom: 12px; }
-    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="container">
@@ -715,12 +605,12 @@
     </div>
   </div>
 
-  <h1 class="app-title">BBB Order Generator</h1>
+  <h1 class="app-title">BBB Invoice Generator</h1>
 
-  <!-- Order Number -->
-  <div class="order-header">
-    <span class="label">Order No.</span>
-    <span class="value" id="orderNumber"></span>
+  <!-- Invoice Number -->
+  <div class="invoice-header">
+    <span class="label">Invoice No.</span>
+    <span class="value" id="invoiceNumber"></span>
   </div>
 
   <!-- Customer Info -->
@@ -806,13 +696,25 @@
     <span class="grand-total-value" id="grandTotal">₹0.00</span>
   </div>
 
+  <!-- Invoice Footer: QR (left) + Stamp/Signature (right) on same line -->
+  <div class="invoice-footer">
+    <div class="invoice-footer-left hidden" id="qrSection">
+      <div class="payment-qr-label">💳 Pay Here</div>
+      <div id="qrcodeContainer"></div>
+    </div>
+    <div class="stamp-container">
+      <img class="stamp-logo" src="signature.png" alt="BBB Stamp" />
+      <div class="stamp-date" id="stampDate"></div>
+    </div>
+  </div>
+
   <hr class="divider" />
 
   <!-- Print & Snapshot Buttons -->
-  <div class="no-print" id="actionButtonsRow" style="display:none; gap:10px; margin-top:8px; flex-wrap:wrap;">
-    <button class="btn btn-print" style="flex:1; min-width:140px;" onclick="printOrder()">🖨️ Print / Save as PDF</button>
+  <div class="no-print" style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+    <button class="btn btn-print" style="flex:1; min-width:140px;" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
     <button class="btn btn-print" style="flex:1; min-width:140px; background:#2d6a4f;" onclick="captureSnapshot()">📸 Save as Image</button>
-    <button class="btn btn-print" style="flex:1; min-width:140px; background:#25d366;" onclick="submitOnWhatsApp()">💬 Submit on WhatsApp</button>
+    <button class="btn btn-print" style="flex:1; min-width:140px; background:#25d366;" onclick="shareOnWhatsApp()">💬 Share on WhatsApp</button>
   </div>
 
   <!-- Copyright Footer -->
@@ -820,36 +722,6 @@
     &copy; <span id="copyrightYear"></span> Beyond Blissful Bakes &bull; By Baisakhi
   </div>
 
-</div>
-
-<!-- Gunnu Chatbot Widget -->
-<div class="chatbot-widget no-print">
-  <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Chat with Gunnu">
-    <span class="chatbot-toggle-icon"><img src="Cheficon.png" alt="Gunnu"></span>
-  </button>
-  <div class="chatbot-panel" id="chatbotPanel">
-    <div class="chatbot-header">
-      <div class="chatbot-avatar">
-        <img src="Cheficon.png" alt="Gunnu">
-      </div>
-      <div>
-        <div class="chatbot-name">Gunnu</div>
-        <div class="chatbot-status">BBB Assistant • Online</div>
-      </div>
-      <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Close chat">✕</button>
-    </div>
-    <div class="chatbot-messages" id="chatbotMessages"></div>
-    <div class="chatbot-quick-replies">
-      <button type="button" onclick="sendQuickReply('Menu')">🍪 Menu</button>
-      <button type="button" onclick="sendQuickReply('Is it eggless?')">🥚 Eggless?</button>
-      <button type="button" onclick="sendQuickReply('Is it fresh?')">🍞 Freshness</button>
-      <button type="button" onclick="sendQuickReply('Hygiene')">✨ Hygiene</button>
-    </div>
-    <div class="chatbot-input-row">
-      <input type="text" id="chatbotInput" placeholder="Ask about a product, price, weight…" />
-      <button class="chatbot-send" onclick="sendChatMessage()" aria-label="Send">➤</button>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1027,15 +899,22 @@
     document.getElementById('itemQty').focus();
   }
 
-  // Generate order number from timestamp
-  function generateOrderNumber() {
+  // Generate invoice number from timestamp
+  function generateInvoiceNumber() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
-    return `ORD-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    return `INV-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
   }
 
-  document.getElementById('orderNumber').textContent = generateOrderNumber();
+  document.getElementById('invoiceNumber').textContent = generateInvoiceNumber();
   document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+
+  // Set today's date below the stamp
+  (function setStampDate() {
+    const now = new Date();
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    document.getElementById('stampDate').textContent = now.toLocaleDateString('en-IN', options);
+  })();
 
   function showAddPanel() {
     if (items.length >= MAX_ITEMS) return;
@@ -1068,6 +947,7 @@
     document.getElementById('customItemRow').style.display = 'none';
     searchItems(); // Reset search
   }
+
 
   function addItem() {
     const idx   = document.getElementById('itemName').value;
@@ -1104,6 +984,7 @@
       document.getElementById('addItemBtn').disabled = true;
     } else {
       cancelAdd();
+      // Keep panel workflow: go back to button
     }
   }
 
@@ -1123,7 +1004,7 @@
       document.getElementById('grandTotal').textContent = '₹0.00';
       document.getElementById('advanceDiscount').value = '0';
       document.getElementById('itemCountNote').textContent = '0 / 20 items';
-      toggleActionButtons(0);
+      document.getElementById('qrSection').classList.add('hidden');
       return;
     }
 
@@ -1152,6 +1033,15 @@
     updateGrandTotal();
     
     document.getElementById('itemCountNote').textContent = `${items.length} / 20 items`;
+    
+    // Show QR section only if grand total > 0
+    const qrSection = document.getElementById('qrSection');
+    if (grand > 0) {
+      qrSection.classList.remove('hidden');
+      generatePaymentQR();
+    } else {
+      qrSection.classList.add('hidden');
+    }
   }
 
   function updateGrandTotal() {
@@ -1161,11 +1051,11 @@
     
     const finalGrandTotal = Math.max(0, totalPrice - advanceDiscount);
     document.getElementById('grandTotal').textContent = `₹${finalGrandTotal.toFixed(2)}`;
-    toggleActionButtons(finalGrandTotal);
-  }
-
-  function toggleActionButtons(grandTotal) {
-    document.getElementById('actionButtonsRow').style.display = grandTotal > 0 ? 'flex' : 'none';
+    
+    // Update QR code if total > 0
+    if (finalGrandTotal > 0) {
+      generatePaymentQR();
+    }
   }
 
   function escapeHtml(str) {
@@ -1179,13 +1069,12 @@
     });
   });
 
-  function printOrder() {
+  function printInvoice() {
     // Close add panel if open before printing
     document.getElementById('addItemPanel').classList.remove('open');
     document.getElementById('addItemBtnRow').style.display = 'flex';
     window.print();
   }
-
   function captureSnapshot() {
     // Close add panel before capture
     document.getElementById('addItemPanel').classList.remove('open');
@@ -1199,7 +1088,7 @@
     }).then(canvas => {
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
       const link = document.createElement('a');
-      link.download = `${document.getElementById('orderNumber').textContent}.png`;
+      link.download = `${document.getElementById('invoiceNumber').textContent}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     }).catch(() => {
@@ -1208,7 +1097,7 @@
     });
   }
 
-  function submitOnWhatsApp() {
+  function shareOnWhatsApp() {
     // Close add panel before capture
     document.getElementById('addItemPanel').classList.remove('open');
     document.getElementById('addItemBtnRow').style.display = 'flex';
@@ -1223,152 +1112,67 @@
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
       
       canvas.toBlob(blob => {
-        const orderNumber = document.getElementById('orderNumber').textContent;
-        const orderMessage = `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`;
+        const invoiceNumber = document.getElementById('invoiceNumber').textContent;
+        const file = new File([blob], `${invoiceNumber}.png`, { type: 'image/png' });
         
-        // Create File object from blob
-        const file = new File([blob], `${orderNumber}.png`, { type: 'image/png' });
-        
-        // Check if device supports Web Share API with files
+        // Check if Web Share API is available
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-          // Use Web Share API - this will let user select WhatsApp and file auto-attaches
           navigator.share({
-            title: 'BBB Order',
-            text: orderMessage,
+            title: 'BBB Invoice',
+            text: `Invoice ${invoiceNumber} from Beyond Blissful Bakes`,
             files: [file]
           }).catch(err => {
             if (err.name !== 'AbortError') {
               console.error('Share failed:', err);
-              fallbackDownload(canvas, orderNumber);
             }
           });
         } else {
-          // Fallback: Download file for manual attachment
-          fallbackDownload(canvas, orderNumber);
+          // Fallback: Open WhatsApp Web and show instructions
+          const message = encodeURIComponent(`📋 *Invoice ${invoiceNumber}* from Beyond Blissful Bakes\n\nPlease download the invoice image to view details.`);
+          const whatsappUrl = `https://web.whatsapp.com/send?text=${message}`;
+          window.open(whatsappUrl, '_blank');
+          
+          // Also download the image for manual attachment
+          setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = `${invoiceNumber}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            alert('WhatsApp has opened. Please attach the downloaded invoice image to your message.');
+          }, 500);
         }
       }, 'image/png');
     }).catch(() => {
       document.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
-      alert('Failed to capture order. Please try again.');
+      alert('Failed to capture invoice. Please try again.');
     });
   }
 
-  function fallbackDownload(canvas, orderNumber) {
-    // Download the screenshot
-    const link = document.createElement('a');
-    link.download = `${orderNumber}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+  const UPI_ID = '8826548216@mbkns'; // ⚠️ Replace with your actual UPI ID
+  const BUSINESS_NAME = 'Beyond Blissful Bakes';
+
+  function generatePaymentQR() {
+    const grandTotalText = document.getElementById('grandTotal').textContent;
+    const amount = parseFloat(grandTotalText.replace('₹', '').trim());
     
-    // Open WhatsApp Web
-    setTimeout(() => {
-      const phoneNumber = '918826548216';
-      const orderMessage = `📋 *Order ${orderNumber}* from Beyond Blissful Bakes\n\nPlease view the attached order details.`;
-      const message = encodeURIComponent(orderMessage);
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-      window.open(whatsappUrl, '_blank');
-    }, 500);
+    if (amount <= 0) return;
+    
+    const upiString = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(BUSINESS_NAME)}&am=${amount.toFixed(2)}&tn=BBB%20Invoice`;
+    
+    const container = document.getElementById('qrcodeContainer');
+    container.innerHTML = '';
+    new QRCode(container, {
+      text: upiString,
+      width: 100,
+      height: 100,
+      colorDark: '#000',
+      colorLight: '#fff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
   }
 
-  // Initialize - order number will be generated on page load
-
-  // ── Gunnu Chatbot ──
-  let chatbotGreeted = false;
-
-  function toggleChatbot() {
-    const panel = document.getElementById('chatbotPanel');
-    const isOpen = panel.classList.toggle('open');
-    if (isOpen) {
-      if (!chatbotGreeted) {
-        appendChatMessage('bot', "Hi, I'm Gunnu 🧁 — your Beyond Blissful Bakes assistant! Ask me about a product's name, weight or price, or tap a quick option below.");
-        chatbotGreeted = true;
-      }
-      document.getElementById('chatbotInput').focus();
-    }
-  }
-
-  function appendChatMessage(sender, text) {
-    const messages = document.getElementById('chatbotMessages');
-    const msg = document.createElement('div');
-    msg.className = `chat-msg ${sender}`;
-    msg.textContent = text;
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  function sendQuickReply(text) {
-    document.getElementById('chatbotInput').value = text;
-    sendChatMessage();
-  }
-
-  function sendChatMessage() {
-    const input = document.getElementById('chatbotInput');
-    const text = input.value.trim();
-    if (!text) return;
-    appendChatMessage('user', text);
-    input.value = '';
-    setTimeout(() => {
-      appendChatMessage('bot', getGunnuResponse(text));
-    }, 300);
-  }
-
-  document.getElementById('chatbotInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendChatMessage();
-  });
-
-  function getGunnuResponse(message) {
-    const text = message.toLowerCase().trim();
-
-    if (/^(hi|hello|hey|namaste|hola)\b/.test(text)) {
-      return "Hello! 👋 I'm Gunnu. Ask me about our products, prices or weights — or say 'menu' to see everything we bake!";
-    }
-    if (text.includes('who are you') || text.includes('your name')) {
-      return "I'm Gunnu 🧁, the friendly assistant for Beyond Blissful Bakes, here to help you with our menu, prices and more!";
-    }
-    if (text.includes('egg')) {
-      return "🥚❌ All our products are 100% eggless — safe and delicious for everyone!";
-    }
-    if (text.includes('fresh')) {
-      return "🍞 Everything is freshly baked in small batches with no preservatives — straight from our oven to you!";
-    }
-    if (text.includes('hygien') || text.includes('clean') || text.includes('healthy') || text.includes('quality')) {
-      return "✨ We follow strict hygiene standards and use quality ingredients, so every product is healthy and hygienically made. We're FSSAI certified (Lic. No. 22726694000028)!";
-    }
-    if (text.includes('menu') || text.includes('categories') || text.includes('what do you have') || text.includes('list')) {
-      const cats = [...new Set(CATALOGUE.map(i => i.category))];
-      return `We bake: ${cats.join(', ')}. 🍪🎂 Ask me about any specific product for its price and weight!`;
-    }
-    if (text.includes('thank')) {
-      return "You're welcome! Happy baking wishes from BBB! 😊";
-    }
-    if (text.includes('contact') || text.includes('order') || text.includes('deliver')) {
-      return "You can add items above and use 'Submit on WhatsApp' to place your order directly with us!";
-    }
-
-    // Search catalogue for matching products
-    if (CATALOGUE.length > 0) {
-      const words = text.split(/\s+/).filter(w => w.length > 2);
-      const matches = CATALOGUE.filter(item => {
-        const nameLower = item.name.toLowerCase();
-        if (text.length > 2 && nameLower.includes(text)) return true;
-        return words.some(w => nameLower.includes(w));
-      });
-
-      if (matches.length > 0) {
-        const seen = new Set();
-        const unique = matches.filter(m => {
-          const key = `${m.name}-${m.unit}`;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-        const lines = unique.slice(0, 6).map(m => `• ${m.name} (${m.unit}) — ₹${m.price}`);
-        return `Here's what I found 🔎:\n${lines.join('\n')}`;
-      }
-    }
-
-    return "Sorry, I couldn't find that. 🤔 Try asking about a product name (e.g. \"Nankhatai price\"), or ask about 'menu', 'fresh', 'egg' or 'hygiene'.";
-  }
+  // Initialize - QR code will show only when total > 0
+  // generatePaymentQR() is called from renderItems() when needed
 
 </script>
 </body>

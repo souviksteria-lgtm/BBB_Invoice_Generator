@@ -87,7 +87,7 @@ This document captures all functional and non-functional requirements for the Be
 - Responsive layout (collapses on screens ≤ 480px)
 
 ### Portability
-- Single `index.html` file (except image assets)
+- Single `invoice.html` file (except image assets)
 - No npm, no Node.js, no dependencies to install
 - CDN-loaded libraries (html2canvas 1.4.1, qrcodejs 1.0.0)
 

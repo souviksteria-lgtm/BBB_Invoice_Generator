@@ -23,7 +23,9 @@ Built with plain HTML, CSS, and JavaScript. No backend, no framework, no install
 
 ```
 BBB_Invoice_Generator/
-├── index.html        # Single-file app (HTML + CSS + JS)
+├── index.html        # Order Generator (default landing page)
+├── invoice.html      # Invoice Generator (HTML + CSS + JS)
+├── catalogue.json    # Product catalogue data
 ├── signature.png     # Merged stamp + signature image
 ├── README.md
 └── Requirements.md
@@ -33,7 +35,7 @@ BBB_Invoice_Generator/
 
 ## 🛠️ How to Use
 
-1. Open `index.html` in any modern browser (Chrome, Edge, Firefox).
+1. Open `invoice.html` in any modern browser (Chrome, Edge, Firefox).
 2. Fill in **Customer Name** and **Contact / Address** (optional).
 3. Click **+ Add Item** to add products from the catalogue.
 4. Review the **Grand Total** and **UPI QR code** for payment.
@@ -63,7 +65,7 @@ The QR code encodes the UPI string:
 upi://pay?pa=8826548216@mbkns&pn=Beyond%20Blissful%20Bakes&am=<TOTAL>&tn=BBB%20Invoice
 ```
 
-To change the UPI ID, edit this line in `index.html`:
+To change the UPI ID, edit this line in `invoice.html`:
 ```js
 const UPI_ID = '8826548216@mbkns';
 ```
