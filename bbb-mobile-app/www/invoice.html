@@ -400,6 +400,11 @@
     /* ── Items table ── */
     .items-section { margin-bottom: 20px; }
 
+    .items-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
     .items-table {
       width: 100%;
       border-collapse: collapse;
@@ -418,6 +423,13 @@
     .items-table tbody tr:hover { background: #f7fafc; }
     .items-table .col-qty, .items-table .col-price, .items-table .col-total { text-align: right; }
     .items-table .col-action { text-align: center; width: 36px; }
+
+    @media (max-width: 480px) {
+      .items-table { font-size: 0.76rem; }
+      .items-table th, .items-table td { padding: 7px 6px; }
+      .items-table th { font-size: 0.66rem; }
+      .items-table .col-action { width: 26px; }
+    }
 
     .empty-state {
       text-align: center;
@@ -659,6 +671,7 @@
     </div>
 
     <!-- Items List -->
+    <div class="items-table-wrapper">
     <table class="items-table" id="itemsTable">
       <thead>
         <tr>
@@ -677,6 +690,7 @@
         </tr>
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- Total Price -->
