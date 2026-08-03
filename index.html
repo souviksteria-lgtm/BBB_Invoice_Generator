@@ -711,6 +711,97 @@
       .chatbot-panel { width: calc(100vw - 24px); right: 12px; }
       .chatbot-widget { right: 12px; bottom: 12px; }
     }
+    .query-widget {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 2000;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .query-toggle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #7b1a1a;
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      cursor: pointer;
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s;
+    }
+    .query-toggle:hover { transform: scale(1.06); }
+    .query-panel {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      bottom: 84px;
+      left: 20px;
+      width: 300px;
+      max-width: calc(100vw - 32px);
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    .query-panel.open { display: flex; }
+    .query-header {
+      background: #7b1a1a;
+      color: #fff;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .query-close {
+      margin-left: auto;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+    .query-close:hover { opacity: 1; }
+    .query-body { padding: 10px 12px; }
+    .query-body textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 8px 10px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      resize: vertical;
+      background: #f7fafc;
+    }
+    .query-body textarea:focus {
+      outline: none;
+      border-color: #7b1a1a;
+      background: #fff;
+    }
+    .query-submit {
+      margin-top: 8px;
+      width: 100%;
+      padding: 9px;
+      background: #25d366;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .query-submit:hover { background: #1ebc59; }
+    @media (max-width: 420px) {
+      .query-panel { width: calc(100vw - 24px); left: 12px; }
+      .query-widget { left: 12px; bottom: 12px; }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -862,6 +953,20 @@
     <div class="chatbot-input-row">
       <input type="text" id="chatbotInput" placeholder="Ask about a product, price, weight…" />
       <button class="chatbot-send" onclick="sendChatMessage()" aria-label="Send">➤</button>
+    </div>
+  </div>
+</div>
+
+<div class="query-widget no-print">
+  <button class="query-toggle" id="queryToggle" onclick="toggleQueryWidget()" aria-label="Ask a query">?</button>
+  <div class="query-panel" id="queryPanel">
+    <div class="query-header">
+      <span>Have a Query?</span>
+      <button class="query-close" onclick="toggleQueryWidget()" aria-label="Close query box">✕</button>
+    </div>
+    <div class="query-body">
+      <textarea id="queryInput" placeholder="Type your query here…"></textarea>
+      <button class="query-submit" onclick="submitQuery()">Submit via WhatsApp</button>
     </div>
   </div>
 </div>
@@ -1274,6 +1379,25 @@
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
       window.open(whatsappUrl, '_blank');
     }, 500);
+  }
+
+  function toggleQueryWidget() {
+    document.getElementById('queryPanel').classList.toggle('open');
+  }
+
+  function submitQuery() {
+    const queryInput = document.getElementById('queryInput');
+    const query = queryInput.value.trim();
+    if (!query) {
+      alert('Please type your query before submitting.');
+      return;
+    }
+    const phoneNumber = '918826548216';
+    const message = encodeURIComponent(`📩 *Query from BBB Invoice page:*\n\n${query}`);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+    queryInput.value = '';
+    toggleQueryWidget();
   }
 
   // Initialize - order number will be generated on page load
