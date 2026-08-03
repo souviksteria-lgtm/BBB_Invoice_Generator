@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BBB Order Generator</title>
+  <script type="module" src="firebase-init.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -980,8 +981,18 @@
   let items = [];
   let CATALOGUE = [];
 
-  // Load catalogue from JSON file
+  // Load catalogue: live Firestore data first (shared, real-time), fall back to bundled JSON
   async function loadCatalogue() {
+    try {
+      const items = await window.fetchCatalogueFromFirestore();
+      if (items && items.length) {
+        CATALOGUE = items;
+        buildDropdown();
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to load catalogue from Firestore, falling back:', error);
+    }
     try {
       const response = await fetch('catalogue.json');
       const data = await response.json();

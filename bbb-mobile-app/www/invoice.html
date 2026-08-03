@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BBB Invoice Generator</title>
+  <script type="module" src="firebase-init.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -769,8 +770,18 @@
     });
   }
 
-  // Load catalogue: prefer the writable copy (includes user-added items), else the bundled JSON
+  // Load catalogue: live Firestore data first (shared, real-time), then the writable local copy, then the bundled JSON
   async function loadCatalogue() {
+    try {
+      const items = await window.fetchCatalogueFromFirestore();
+      if (items && items.length) {
+        CATALOGUE = items;
+        buildDropdown();
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to load catalogue from Firestore, falling back:', error);
+    }
     try {
       const persisted = await readPersistentCatalogue();
       if (persisted && Array.isArray(persisted.items)) {

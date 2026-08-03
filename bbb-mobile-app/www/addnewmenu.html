@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add New Menu - BBB</title>
+  <script type="module" src="firebase-init.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -172,6 +173,9 @@
 <!-- Cordova is pre-loaded with every app -->
 <script src="cordova.js"></script>
 <script>
+  // Passcode required to write catalogue items to Firestore (checked against Firestore security rules)
+  const ADMIN_PASSCODE = '01012026';
+
   let isCordovaReady = false;
   document.addEventListener('deviceready', function () { isCordovaReady = true; }, false);
 
@@ -253,6 +257,15 @@
     if (!name || !unit || !price || price <= 0) {
       showStatus('Please fill in all fields with valid values.', true);
       return;
+    }
+
+    try {
+      await window.addCatalogueItemToFirestore({ category, name, unit, price }, ADMIN_PASSCODE);
+      showStatus(`"${name}" added to the menu instantly!`, false);
+      document.getElementById('addMenuForm').reset();
+      return;
+    } catch (error) {
+      console.error('Failed to save to Firestore, falling back to local storage:', error);
     }
 
     try {

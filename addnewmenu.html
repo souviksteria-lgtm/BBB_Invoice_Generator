@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add New Menu - BBB</title>
+  <script type="module" src="firebase-init.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -170,6 +171,9 @@
 </div>
 
 <script>
+  // Passcode required to write catalogue items to Firestore (checked against Firestore security rules)
+  const ADMIN_PASSCODE = '01012026';
+
   async function loadCurrentCatalogue() {
     const response = await fetch('catalogue.json');
     return await response.json();
@@ -204,16 +208,22 @@
     }
 
     try {
-      // This is a static site with no backend, so the browser can't write catalogue.json
-      // directly - download the updated file and have the user replace it in the repo.
-      const catalogue = await loadCurrentCatalogue();
-      catalogue.items.push({ category, name, unit, price });
-      downloadCatalogueJson(catalogue);
-      showStatus(`"${name}" added. Downloaded updated catalogue.json — replace the existing file in the project and redeploy.`, false);
+      await window.addCatalogueItemToFirestore({ category, name, unit, price }, ADMIN_PASSCODE);
+      showStatus(`"${name}" added to the menu instantly!`, false);
       document.getElementById('addMenuForm').reset();
     } catch (error) {
-      console.error('Failed to save new menu item:', error);
-      showStatus('Failed to save the item. Please try again.', true);
+      console.error('Failed to save to Firestore, falling back to download:', error);
+      try {
+        // Firestore unavailable (e.g. not configured yet) - fall back to the manual-replace flow
+        const catalogue = await loadCurrentCatalogue();
+        catalogue.items.push({ category, name, unit, price });
+        downloadCatalogueJson(catalogue);
+        showStatus(`"${name}" added. Downloaded updated catalogue.json — replace the existing file in the project and redeploy.`, false);
+        document.getElementById('addMenuForm').reset();
+      } catch (fallbackError) {
+        console.error('Failed to save new menu item:', fallbackError);
+        showStatus('Failed to save the item. Please try again.', true);
+      }
     }
   });
 </script>
