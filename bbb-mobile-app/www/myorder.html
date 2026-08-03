@@ -869,15 +869,43 @@
 
 <script>
   let isCordovaReady = false;
-  document.addEventListener('deviceready', function () { isCordovaReady = true; }, false);
+  let isDomReady = false;
+  document.addEventListener('deviceready', function () { isCordovaReady = true; tryLoadCatalogue(); }, false);
 
   const MAX_ITEMS = 20;
   let items = [];
   let CATALOGUE = [];
 
-  // Load catalogue from JSON file
+  // Reads the writable catalogue.json saved by the "Add New Menu" page, if any
+  function readPersistentCatalogue() {
+    return new Promise(resolve => {
+      if (!window.resolveLocalFileSystemURL || !window.cordova || !window.cordova.file) {
+        resolve(null);
+        return;
+      }
+      window.resolveLocalFileSystemURL(cordova.file.dataDirectory + 'catalogue.json', fileEntry => {
+        fileEntry.file(file => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            try { resolve(JSON.parse(reader.result)); }
+            catch (e) { resolve(null); }
+          };
+          reader.onerror = () => resolve(null);
+          reader.readAsText(file);
+        }, () => resolve(null));
+      }, () => resolve(null));
+    });
+  }
+
+  // Load catalogue: prefer the writable copy (includes user-added items), else the bundled JSON
   async function loadCatalogue() {
     try {
+      const persisted = await readPersistentCatalogue();
+      if (persisted && Array.isArray(persisted.items)) {
+        CATALOGUE = persisted.items;
+        buildDropdown();
+        return;
+      }
       const response = await fetch('catalogue.json');
       const data = await response.json();
       CATALOGUE = data.items;
@@ -888,8 +916,13 @@
     }
   }
 
-  // Load catalogue on page load
-  document.addEventListener('DOMContentLoaded', loadCatalogue);
+  // Wait for the DOM, and for Cordova (when running inside the app), before loading the catalogue
+  function tryLoadCatalogue() {
+    if (!isDomReady) return;
+    if (window.cordova && !isCordovaReady) return;
+    loadCatalogue();
+  }
+  document.addEventListener('DOMContentLoaded', function () { isDomReady = true; tryLoadCatalogue(); });
 
   // Populate dropdown, with Other at the bottom
   function buildDropdown() {

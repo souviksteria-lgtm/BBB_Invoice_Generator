@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add New Menu - BBB</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #2d3748;
+      min-height: 100vh;
+      padding: 8px 16px 24px;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+      padding: 12px 20px 24px;
+    }
+
+    .brand-header {
+      text-align: center;
+      padding: 8px 10px 6px;
+      border-bottom: 3px solid #7b1a1a;
+      margin-bottom: 14px;
+      background: linear-gradient(135deg, #fff 60%, #fdf5f5 100%);
+      border-radius: 8px 8px 0 0;
+    }
+    .brand-name {
+      font-family: 'Cooper BT', 'CooperBT', 'Cooper Black', 'Arial Black', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #7b1a1a;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+    .brand-byline {
+      font-size: 0.75rem;
+      color: #7b1a1a;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .page-title {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a365d;
+      margin-bottom: 16px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #718096;
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #f7fafc;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #7b1a1a;
+      background: #fff;
+    }
+
+    .btn-save {
+      width: 100%;
+      padding: 13px;
+      background: #7b1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .btn-save:hover { background: #5e1414; }
+    .btn-save:active { transform: scale(0.98); }
+
+    .btn-back {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      padding: 11px;
+      background: #edf2f7;
+      color: #2d3748;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .status-msg {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    .status-msg.success { background: #e6f7ee; color: #1a7d47; border: 1px solid #b7e4cb; }
+    .status-msg.error { background: #fdecec; color: #a12626; border: 1px solid #f3b8b8; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="brand-header">
+    <div class="brand-name">Beyond Blissful Bakes</div>
+    <div class="brand-byline">By Baisakhi</div>
+  </div>
+
+  <div class="page-title">📝 Add New Menu Item</div>
+
+  <form id="addMenuForm">
+    <div class="form-group">
+      <label for="itemCategory">Category</label>
+      <select id="itemCategory">
+        <option value="Cookies &amp; Crackers">Cookies &amp; Crackers</option>
+        <option value="Dry Cakes">Dry Cakes</option>
+        <option value="Muffins">Muffins</option>
+        <option value="Specialties">Specialties</option>
+        <option value="Cream Cakes">Cream Cakes</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="itemName">Item Name</label>
+      <input type="text" id="itemName" placeholder="e.g., Almond Cookies" required />
+    </div>
+
+    <div class="form-group">
+      <label for="itemUnit">Unit</label>
+      <input type="text" id="itemUnit" placeholder="e.g., 150g, 4 pcs., 500ml" required />
+    </div>
+
+    <div class="form-group">
+      <label for="itemPrice">Price (₹)</label>
+      <input type="number" id="itemPrice" placeholder="e.g., 150" min="0" step="1" required />
+    </div>
+
+    <button type="submit" class="btn-save">💾 Save to Menu</button>
+  </form>
+
+  <div class="status-msg" id="statusMsg"></div>
+
+  <a href="index.html" class="btn-back">⬅ Back to Menu</a>
+</div>
+
+<!-- Cordova is pre-loaded with every app -->
+<script src="cordova.js"></script>
+<script>
+  let isCordovaReady = false;
+  document.addEventListener('deviceready', function () { isCordovaReady = true; }, false);
+
+  // Reads the writable catalogue.json, falling back to null if it doesn't exist yet
+  function readPersistentCatalogue() {
+    return new Promise(resolve => {
+      if (!window.resolveLocalFileSystemURL || !window.cordova || !window.cordova.file) {
+        resolve(null);
+        return;
+      }
+      window.resolveLocalFileSystemURL(cordova.file.dataDirectory + 'catalogue.json', fileEntry => {
+        fileEntry.file(file => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            try { resolve(JSON.parse(reader.result)); }
+            catch (e) { resolve(null); }
+          };
+          reader.onerror = () => resolve(null);
+          reader.readAsText(file);
+        }, () => resolve(null));
+      }, () => resolve(null));
+    });
+  }
+
+  // Writes the given catalogue data to the app's private, writable storage
+  function writePersistentCatalogue(data) {
+    return new Promise((resolve, reject) => {
+      if (!window.resolveLocalFileSystemURL || !window.cordova || !window.cordova.file) {
+        reject(new Error('not-cordova'));
+        return;
+      }
+      window.resolveLocalFileSystemURL(cordova.file.dataDirectory, dirEntry => {
+        dirEntry.getFile('catalogue.json', { create: true, exclusive: false }, fileEntry => {
+          fileEntry.createWriter(writer => {
+            writer.onerror = reject;
+            writer.onwriteend = () => {
+              writer.onwriteend = () => resolve();
+              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+              writer.write(blob);
+            };
+            writer.truncate(0);
+          }, reject);
+        }, reject);
+      }, reject);
+    });
+  }
+
+  // Loads the current catalogue: the writable copy if present, else the bundled one
+  async function loadCurrentCatalogue() {
+    const persisted = await readPersistentCatalogue();
+    if (persisted && Array.isArray(persisted.items)) return persisted;
+    const response = await fetch('catalogue.json');
+    return await response.json();
+  }
+
+  function showStatus(message, isError) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = message;
+    el.className = 'status-msg ' + (isError ? 'error' : 'success');
+    el.style.display = 'block';
+  }
+
+  function downloadCatalogueJson(data) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.download = 'catalogue.json';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  }
+
+  document.getElementById('addMenuForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const category = document.getElementById('itemCategory').value;
+    const name = document.getElementById('itemName').value.trim();
+    const unit = document.getElementById('itemUnit').value.trim();
+    const price = Number(document.getElementById('itemPrice').value);
+
+    if (!name || !unit || !price || price <= 0) {
+      showStatus('Please fill in all fields with valid values.', true);
+      return;
+    }
+
+    try {
+      const catalogue = await loadCurrentCatalogue();
+      catalogue.items.push({ category, name, unit, price });
+
+      if (window.cordova && window.cordova.file) {
+        await writePersistentCatalogue(catalogue);
+        showStatus(`"${name}" added to the menu successfully!`, false);
+        document.getElementById('addMenuForm').reset();
+      } else {
+        // Plain browser: can't write files directly, so offer a download instead
+        downloadCatalogueJson(catalogue);
+        showStatus(`"${name}" added. Downloaded updated catalogue.json — please replace the existing file.`, false);
+        document.getElementById('addMenuForm').reset();
+      }
+    } catch (error) {
+      console.error('Failed to save new menu item:', error);
+      showStatus('Failed to save the item. Please try again.', true);
+    }
+  });
+</script>
+</body>
+</html>
